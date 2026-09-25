@@ -62,5 +62,35 @@ class TestRecordsToDataFrame(unittest.TestCase):
         self.assertEqual(str(frame["level"].dtype), "string")
         self.assertEqual(str(frame["status_code"].dtype), "Int64")
         self.assertEqual(str(frame["latency_ms"].dtype), "Float64")
+    def test_tracks_missing_optional_values(self):
+        record = NormalizedLogRecord(
+            timestamp=datetime(
+                2026,
+                9,
+                22,
+                10,
+                0,
+                tzinfo=timezone.utc,
+            ),
+            service="auth",
+            level="INFO",
+            message="login succeeded",
+        )
+
+        frame = records_to_dataframe([record])
+        missing_counts = frame.isna().sum().to_dict()
+
+        self.assertEqual(
+            missing_counts,
+            {
+                "timestamp": 0,
+                "service": 0,
+                "level": 0,
+                "message": 0,
+                "request_id": 1,
+                "status_code": 1,
+                "latency_ms": 1,
+            },
+        )
 if __name__ == "__main__":
     unittest.main()
