@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 from backend.app.metrics.dataframe import records_to_dataframe
 from backend.app.metrics.features import (
     METRIC_COLUMNS,
-    build_window_metrics)
+    build_window_metrics,
+    )
 from backend.app.parsing.models import NormalizedLogRecord
 
 
@@ -110,5 +111,59 @@ class TestBuildWindowMetrics(unittest.TestCase):
         self.assertEqual(metrics["error_rate"].tolist(), [1.0])
         self.assertTrue(metrics["mean_latency_ms"].isna().all())
         self.assertTrue(metrics["p95_latency_ms"].isna().all())
+    def test_groups_metrics_by_service(self):
+        timestamp = datetime(
+            2026,
+            9,
+            22,
+            10,
+            1,
+            tzinfo=timezone.utc,
+        )
+        records = [
+            NormalizedLogRecord(
+                timestamp=timestamp,
+                service="auth",
+                level="ERROR",
+                message="login failed",
+                latency_ms=100.0,
+            ),
+            NormalizedLogRecord(
+                timestamp=timestamp,
+                service="payment",
+                level="INFO",
+                message="payment accepted",
+                latency_ms=300.0,
+            ),
+        ]
+        frame = records_to_dataframe(records)
+
+        metrics = build_window_metrics(frame)
+        metrics_by_service = metrics.set_index("service")
+
+        self.assertEqual(
+            metrics_by_service.loc["auth", "request_count"],
+            1,
+        )
+        self.assertEqual(
+            metrics_by_service.loc["auth", "error_count"],
+            1,
+        )
+        self.assertEqual(
+            metrics_by_service.loc["auth", "error_rate"],
+            1.0,
+        )
+        self.assertEqual(
+            metrics_by_service.loc["payment", "request_count"],
+            1,
+        )
+        self.assertEqual(
+            metrics_by_service.loc["payment", "error_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics_by_service.loc["payment", "error_rate"],
+            0.0,
+        )
 if __name__ == "__main__":
     unittest.main()
