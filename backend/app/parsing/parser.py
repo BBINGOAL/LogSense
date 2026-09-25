@@ -3,9 +3,15 @@ from datetime import datetime, timezone
 
 from .models import NormalizedLogRecord
 
+class LogParseError(ValueError):
+    pass
+
 #return เป็น class ที่ normalize เเล้ว  
 def parse_log_record(raw_line: str) -> NormalizedLogRecord:
-    data = json.loads(raw_line)
+    try:
+        data = json.loads(raw_line)
+    except json.JSONDecodeError as error:
+        raise LogParseError(f"invalid JSON: {error.msg}") from error
 
     timestamp = datetime.fromisoformat(data["timestamp"])
     if timestamp.tzinfo is None:
