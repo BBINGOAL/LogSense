@@ -4,32 +4,32 @@ LogSense is a learning project for analyzing application logs and detecting anom
 
 ## Current progress
 
-Phase 2 — Structured log parser
+Phase 3 — Pandas and time-window metrics
 
 The current program can:
 
-- Read JSON Lines (`.jsonl`) one record at a time
-- Parse valid JSON into a `NormalizedLogRecord`
-- Normalize timestamps to UTC
-- Normalize log levels to uppercase
-- Support optional request ID, status code, and latency fields
-- Report malformed JSON and missing required fields
-- Report invalid timestamps and missing timezone information
-- Preserve the source line number when reporting file errors
+- Parse JSON Lines into normalized log records
+- Convert normalized records into a typed Pandas DataFrame
+- Preserve missing optional values
+- Filter logs by level
+- Group logs by service and configurable time windows
+- Calculate request count, error count, and error rate
+- Calculate mean and p95 latency
+- Return a stable metric schema for empty input
+- Report parse failures with source line numbers
 
 ## Current data flow
 
 ```text
 sample.jsonl
-    -> read one source line
-    -> parse JSON
-    -> validate required fields
-    -> normalize timestamp and log level
+    -> parse and validate each log
     -> NormalizedLogRecord
-    -> print normalized output or parse failure
+    -> typed Pandas DataFrame
+    -> group by service and time window
+    -> request, error, and latency metrics
 ```
 
-This flow uses deterministic Python logic. It does not use machine learning or an LLM.
+This flow uses deterministic Python and Pandas logic. It does not use machine learning or an LLM.
 
 ## Requirements
 
@@ -49,6 +49,12 @@ Activate it on Windows PowerShell:
 .\.venv\Scripts\Activate.ps1
 ```
 
+Install dependencies:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
 ## Run
 
 ```powershell
@@ -64,6 +70,7 @@ python -m unittest discover -v
 ## Current limitations
 
 - Field value types are not fully validated yet
-- Parsed records are not stored in a database
-- Time-window metrics are not implemented yet
-- Anomaly detection is not implemented yet
+- Metrics are calculated in memory and are not stored in a database
+- Rule-based anomaly detection is not implemented yet
+- Machine-learning anomaly detection is not implemented yet
+- Evaluation metrics and labeled datasets are not implemented yet
