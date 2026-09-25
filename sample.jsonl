@@ -1,4 +1,4 @@
-{"timestamp":"2026-09-22T10:00:00Z","service":"auth","level":"ERROR","message":"login failed"}
-{"timestamp":"2026-09-22T10:00:01Z","service":"auth","level":"INFO","message":"login succeeded"}
+{"timestamp":"2026-09-22T10:00:00Z","service":"auth","level":"ERROR","message":"login failed","status_code":401,"latency_ms":250.0}
+{"timestamp":"2026-09-22T10:00:01Z","service":"auth","level":"INFO","message":"login succeeded","status_code":200,"latency_ms":100.0}
 {"service":"auth","level":"ERROR","message":"broken"
 {"timestamp":"2026-09-22T10:00:02","service":"auth","level":"INFO","message":"timezone missing"}
