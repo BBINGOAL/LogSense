@@ -12,11 +12,13 @@ LogSense เป็นโปรเจกต์สำหรับฝึกงา�
 
 ## กฎสำคัญที่สุด: learning-first
 
-### ห้ามให้ complete implementation ทันที
+### ใช้ step-by-step learning workflow
 
-เมื่อผู้ใช้ถามว่า “ทำอย่างไร”, “ช่วยเขียน”, “เพิ่ม feature”, “แก้ส่วนนี้” หรือคำถามที่นำไปสู่การเขียนโค้ดได้ ห้ามตอบด้วย complete implementation ทันที แม้จะเป็นงานที่ดูเล็กก็ตาม
+เมื่อผู้ใช้ถามว่า “ทำอย่างไร”, “ช่วยเขียน”, “เพิ่ม feature”, “แก้ส่วนนี้” หรือคำถามที่นำไปสู่การเขียนโค้ดได้ ให้แบ่งงานเป็น `phase` และ `step` เล็ก ๆ แทนการรอให้ผู้ใช้เขียนโค้ดเองทั้งหมดก่อน
 
-ต้องใช้ลำดับนี้ก่อนเสมอ:
+เป้าหมายคือให้ผู้ใช้เรียนรู้จากโค้ดที่นำไปใช้ได้จริง โดยไม่ทำให้การพัฒนาช้าเกินไป
+
+ในแต่ละ phase ต้องทำตามลำดับนี้:
 
 1. **อธิบายสิ่งที่จะสร้างและเหตุผล**
    - กำลังแก้ปัญหาอะไร
@@ -30,31 +32,45 @@ LogSense เป็นโปรเจกต์สำหรับฝึกงา�
    - บอก data ที่ไหลผ่านแต่ละขั้น
    - แยกส่วนที่เป็น deterministic logic ออกจากส่วนที่เป็น `ML` หรือ `LLM`
 
-3. **ให้ hints, pseudocode หรือ small concrete task**
-   - ให้โจทย์เล็กพอที่ผู้ใช้จะลองทำเองได้
-   - ใช้ pseudocode หรือ code snippet สั้น ๆ เฉพาะส่วนที่จำเป็น
-   - อย่าซ่อน logic สำคัญไว้ใน helper ที่เขียนให้เสร็จทั้งหมด
-   - ถ้าเหมาะสม ให้เริ่มจาก function เดียว, test เดียว หรือ data example เดียว
+3. **ให้โค้ดของ step ปัจจุบัน**
+   - ให้โค้ดที่จำเป็นสำหรับ step นี้โดยตรง พร้อมไฟล์และตำแหน่งที่ต้องแก้
+   - แบ่งโค้ดเป็นส่วนเล็ก อ่านและรันได้ ไม่ generate ทั้ง phase หรือทั้งโปรเจกต์ในครั้งเดียว
+   - อย่าซ่อน logic สำคัญไว้ใน helper ที่ไม่ได้อธิบาย
+   - ถ้าโค้ดมีส่วนที่ผู้ใช้ควรคิดเอง ให้ทำเครื่องหมายเป็น `TODO` หรืออธิบาย decision point อย่างชัดเจน
 
-4. **ขอให้ผู้ใช้ลงมือทำและส่งความพยายามกลับมา**
-   - ต้องถามอย่างชัดเจนให้ผู้ใช้ลองเขียน/แก้ก่อน
-   - ขอให้ส่ง code, pseudocode, output หรือ error ที่ได้
-   - อย่าปิดท้ายด้วยการแปะ solution เต็มทันที
+4. **บอกงานที่ผู้ใช้ต้องทำใน step นี้**
+   - ระบุเป็น checklist สั้น ๆ เช่น สร้างไฟล์, วางโค้ด, ติดตั้ง dependency, รันคำสั่ง หรือเปิดดู output
+   - บอก expected result และวิธีสังเกตว่า step ผ่านหรือไม่
+   - ระบุ test หรือ manual check ที่ต้องทำ
+   - อธิบายศัพท์และ logic สำคัญแบบสั้น ๆ พร้อมเปรียบเทียบกับ Java/C เมื่อเหมาะสม
 
-หลังจากผู้ใช้ส่งความพยายามแล้ว ให้ review แบบสอน:
+5. **หยุดรอคำว่า `ต่อ`**
+   - หลังจบ step ให้ถามว่า “ถ้าทำเสร็จแล้ว พิมพ์ `ต่อ` เพื่อไป step ถัดไป”
+   - ห้ามเดินหน้าไป step ถัดไปเองในข้อความเดียวกัน
+   - ถ้าผู้ใช้พิมพ์ `ต่อ` ให้ตรวจ context ของ step ก่อนหน้าแบบสั้น ๆ แล้วเริ่ม step ถัดไป
+   - ถ้าผู้ใช้ส่ง output หรือ error แทน `ต่อ` ให้ช่วย debug step ปัจจุบันก่อน
+   - ถ้าผู้ใช้พิมพ์ `ต่อ` ทั้งที่ยังมี error สำคัญ ให้แจ้งเตือนและขอผล test/error ก่อนเดินหน้าตามความเหมาะสม
 
-- ถาม guiding questions ก่อนบอกคำตอบ
-- ชี้จุดที่ถูกต้องก่อนชี้จุดที่ผิด
-- ให้ hint ที่แคบลงทีละระดับ
-- ให้ผู้ใช้แก้เองอีกครั้งถ้ายังมีโอกาสเรียนรู้ได้
+### ระดับของ code ที่ให้
 
-### เมื่อใดจึงให้ full solution ได้
+- ให้ code ของ step ปัจจุบันได้เลย ไม่ต้องบังคับให้ผู้ใช้ลองเขียนก่อนทุกครั้ง
+- ห้ามให้ code ของทุก step ใน phase เดียวกันพร้อมกัน เว้นแต่ผู้ใช้ขอภาพรวมเท่านั้น
+- ห้าม generate entire project หรือ complete implementation ของ feature ใหญ่ในครั้งเดียว
+- โค้ดที่ให้ต้องมีคำอธิบายว่าแต่ละส่วนทำอะไรและเชื่อมกับ flow อย่างไร
+- หากผู้ใช้ขอให้ลดคำอธิบาย ให้คงอย่างน้อย purpose, งานที่ต้องทำ, วิธีทดสอบ และจุดที่ต้องพิมพ์ `ต่อ`
 
-ให้ full solution ได้เมื่อเข้าเงื่อนไขอย่างน้อยหนึ่งข้อ:
+เมื่อผู้ใช้ทำตาม step แล้วส่ง code, output หรือ error กลับมา ให้ review แบบสอน:
 
-- ผู้ใช้ลองทำแล้ว แต่ยังติดจริง ๆ หลังจากได้รับ hints และคำถามนำทาง
-- ผู้ใช้บอกชัดเจนว่า “ทำไม่ได้จริง ๆ”, “ติดจนไปต่อไม่ได้” หรือขอ solution โดยตรงหลังจากได้อธิบายแนวคิดแล้ว
-- เป็นโค้ด infrastructure ที่จำเป็นมากและไม่ใช่ learning target หลัก เช่น boilerplate configuration, minimal Docker wiring หรือ test fixture ที่ซ้ำซ้อน
+- ชี้สิ่งที่ถูกต้องก่อน
+- ถามหรืออธิบายสาเหตุของ error แบบกระชับ
+- ให้ patch เฉพาะ step ปัจจุบัน ไม่ข้ามไปสร้าง feature ถัดไป
+- เมื่อ step ผ่านแล้ว ให้สรุปและรอ `ต่อ`
+
+### เมื่อใดจึงให้ solution ที่ใหญ่ขึ้นได้
+
+ให้ solution ที่ใหญ่ขึ้นได้เมื่อผู้ใช้พิมพ์ `ต่อ` เพื่อขอ step ถัดไป หรือขอให้ทำต่ออย่างชัดเจน แต่ยังต้องแบ่งเป็น step และไม่ข้าม phase โดยไม่มี checkpoint
+
+ถ้าผู้ใช้ติด error ให้แก้ตาม debugging behavior ก่อน ไม่ต้องรอให้ผู้ใช้แก้เองจนหมด แต่ต้องอธิบาย root cause และให้ผู้ใช้รันตรวจสอบ
 
 แม้ได้รับอนุญาตให้ให้ solution แล้ว ต้องอธิบายตามลำดับนี้:
 
@@ -65,6 +81,7 @@ LogSense เป็นโปรเจกต์สำหรับฝึกงา�
 ### ห้ามทำแทนทั้งโปรเจกต์
 
 - ห้าม generate entire project หรือทุก feature ในครั้งเดียว
+- ต้องหยุดที่จุดจบของแต่ละ step และรอคำว่า `ต่อ`
 - ห้ามสร้าง abstraction จำนวนมากก่อนที่ผู้ใช้เข้าใจ data flow
 - ห้ามเพิ่ม framework, service หรือ feature ที่ไม่จำเป็นต่อ milestone ปัจจุบัน
 - ห้ามบอกว่า code “ทำงานแล้ว” หากยังไม่ได้รัน test หรือแสดงหลักฐานการตรวจสอบ
@@ -243,65 +260,82 @@ log source/file
 
 ต้องพัฒนาตามลำดับนี้ เว้นแต่ผู้ใช้มีเหตุผลชัดเจนและยอมรับ trade-off:
 
-### Stage 1 — Python and log fundamentals
+### Phase overview
+
+| Phase | หัวข้อ | ผลลัพธ์หลัก |
+| ---: | --- | --- |
+| 1 | Python และพื้นฐาน Log | เข้าใจ Python, JSON, ไฟล์, timestamp และ testing |
+| 2 | Parse Structured Logs | แปลง JSON log เป็น normalized schema เดียว |
+| 3 | Pandas และ Metrics | รวม log เป็น time-window เช่น error count, error rate, latency |
+| 4 | Rule-based Baseline | ตรวจ anomaly ด้วย threshold ที่อธิบายได้ |
+| 5 | Isolation Forest และ Evaluation | ตรวจ anomaly แบบ ML และวัด precision, recall, F1, false positives |
+| 6 | Incident Engine | รวม anomaly ที่เกี่ยวข้องกันเป็น incident เดียว |
+| 7 | Evidence-based LLM | ให้ LLM อธิบายจากหลักฐาน พร้อมแยก facts, inference และ uncertainty |
+| 8 | Dashboard | แสดง incident, timeline, metrics, evidence และ explanation |
+| 9 | Docker และ CI | ทำ local setup ซ้ำได้ และให้ GitHub Actions รัน test/lint |
+| 10 | CloudWatch Connector | เชื่อม AWS CloudWatch หลัง local pipeline เสถียรแล้ว |
+
+แต่ละ phase ต้องถูกแบ่งเป็น `Step 1`, `Step 2`, ... ตามขนาดงานจริง โดย AI coding agent ต้องให้โค้ดและ checklist ของทีละ step เท่านั้น แล้วหยุดรอผู้ใช้พิมพ์ `ต่อ` ก่อนเริ่ม step ถัดไป
+
+### Phase 1 — Python และพื้นฐาน Log
 
 - variables, functions, collections, exceptions, modules, virtual environment
 - อ่านไฟล์, JSON, timestamps และ basic testing
 - เรียนรู้ log levels, structured vs unstructured logs และ schema design
 
-### Stage 2 — Parse structured logs
+### Phase 2 — Parse Structured Logs
 
 - กำหนด normalized schema ขนาดเล็ก
 - เขียน parser function เดียวก่อน
 - จัดการ missing field, malformed JSON และ invalid timestamp
 - เขียน unit tests จาก valid และ invalid examples
 
-### Stage 3 — Pandas
+### Phase 3 — Pandas และ Metrics
 
 - สร้าง `DataFrame` จาก normalized records
 - filter, group, aggregate และ time-window resampling
 - ตรวจ missing values, dtypes และ timezone
 - สร้าง feature table พร้อมคำอธิบายแต่ละ column
 
-### Stage 4 — Metrics and rule baseline
+### Phase 4 — Rule-based Baseline
 
 - กำหนด metric และ threshold อย่างมีเหตุผล
 - สร้าง baseline ที่อธิบายได้
 - ทดสอบ edge cases เช่น ไม่มี log, ทุก record เป็น error, window เดียว และ threshold เท่ากับค่าพอดี
 
-### Stage 5 — Isolation Forest and evaluation
+### Phase 5 — Isolation Forest และ Evaluation
 
 - สร้าง training/scoring flow
 - อธิบาย feature selection และ `contamination`
 - เปรียบเทียบผลกับ rule baseline
 - รายงาน precision, recall, F1 และ false positives
 
-### Stage 6 — Incident engine
+### Phase 6 — Incident Engine
 
 - รวม anomalies ตาม time proximity, service และ shared evidence
 - กำหนด incident status และ severity
 - ทำให้ผลลัพธ์ deterministic ก่อนเพิ่ม LLM
 
-### Stage 7 — LLM analysis
+### Phase 7 — Evidence-based LLM
 
 - สร้าง evidence bundle
 - ออกแบบ prompt ที่อ้างอิง facts เท่านั้น
 - บังคับ structured response และเก็บ uncertainty
 - เพิ่ม tests สำหรับ evidence completeness และ malformed model output
 
-### Stage 8 — Dashboard
+### Phase 8 — Dashboard
 
 - สร้าง view สำหรับ incident list, detail, timeline และ evidence
 - เชื่อม API แบบง่าย
 - ทำ loading/error/empty states ให้ครบ
 
-### Stage 9 — Docker and CI
+### Phase 9 — Docker และ CI
 
 - เพิ่ม Docker Compose สำหรับ app และ PostgreSQL ตามความจำเป็น
 - เพิ่ม GitHub Actions สำหรับ lint, unit tests และ build
 - ทำให้ setup ใน README ทำตามได้ตั้งแต่ต้นจนจบ
 
-### Stage 10 — CloudWatch connector
+### Phase 10 — CloudWatch Connector
 
 - ออกแบบ connector boundary ก่อน
 - ใช้ test doubles/local fixtures ก่อนต่อ AWS จริง
@@ -383,8 +417,9 @@ LogSense/
 1. อ่าน repository structure และไฟล์ที่เกี่ยวข้อง
 2. ตรวจสถานะการเปลี่ยนแปลงที่ผู้ใช้ทำไว้ และอย่าทับงานที่ไม่เกี่ยวข้อง
 3. ระบุ milestone ปัจจุบันและ scope ของคำขอ
-4. อธิบาย flow และถามให้ผู้ใช้ลองส่วนเล็ก ๆ ก่อน หากคำขอนั้นเป็น learning task
-5. กำหนด acceptance criteria และ test ที่ควรมี
+4. แบ่ง phase ปัจจุบันเป็น steps ที่จบได้ทีละช่วง และเลือกทำเพียง step แรก
+5. อธิบาย flow, acceptance criteria และ test ของ step แรก
+6. ให้โค้ดและรายการงานที่ผู้ใช้ต้องทำของ step แรก แล้วหยุดรอ `ต่อ`
 
 ระหว่างแก้:
 
@@ -392,13 +427,15 @@ LogSense/
 - อธิบายผลกระทบของแต่ละไฟล์
 - รันเฉพาะ checks ที่เกี่ยวข้องก่อน แล้วค่อยขยายเมื่อจำเป็น
 - หากพบ failure ใหม่ ให้หยุดสรุปสาเหตุก่อนเพิ่ม workaround
+- อย่าทำ step ถัดไปจนกว่าผู้ใช้จะพิมพ์ `ต่อ`
 
 หลังแก้:
 
 - รัน tests/lint/build ที่เกี่ยวข้อง
 - รายงานว่าอะไรผ่านและอะไรยังไม่ได้ตรวจ
 - สรุป files changed และเหตุผลระดับ behavior
-- เสนอ debugging/modification task สั้น ๆ ให้ผู้ใช้ทำต่อ
+- เสนอ debugging/modification task สั้น ๆ ให้ผู้ใช้ทำใน step นี้
+- ระบุชัดเจนว่าเมื่อทำเสร็จแล้วให้พิมพ์ `ต่อ` เพื่อไป step ถัดไป
 - ถ้ายังไม่มี test หรือ verification ห้ามอ้างว่า feature เสร็จสมบูรณ์
 
 ---
@@ -424,10 +461,13 @@ LogSense/
 
 ## Response template สำหรับ AI coding agent
 
-เมื่อต้องช่วยงาน feature ใหม่ ให้ใช้รูปแบบย่อดังนี้ เว้นแต่ผู้ใช้ขอรูปแบบอื่น:
+เมื่อต้องช่วยงาน feature ใหม่ ให้ใช้รูปแบบ step-by-step ดังนี้ เว้นแต่ผู้ใช้ขอรูปแบบอื่น:
 
 ```text
-เป้าหมาย:
+Phase / Step:
+Phase ... — Step ...: ...
+
+เป้าหมายของ step นี้:
 สิ่งที่กำลังสร้างและเหตุผลคือ ...
 
 Flow:
@@ -435,45 +475,55 @@ Flow:
 2. ...
 3. ...
 
-แนวคิด Python/ระบบที่เกี่ยวข้อง:
-- ...
-
-โจทย์เล็กให้ลองทำ:
+โค้ด:
+ไฟล์: ...
+```python
 ...
-
-Hint / pseudocode:
-...
-
-ลองทำส่วนนี้ก่อน แล้วส่ง code หรือ output ที่ได้มาให้ผม review
 ```
 
-ถ้าผู้ใช้พยายามแล้วและอนุญาตให้ให้ solution ให้เปลี่ยนเป็น:
+สิ่งที่ต้องทำ:
+- [ ] ...
+- [ ] ...
 
-```text
-สิ่งที่ลองทำถูกต้องแล้ว:
-...
-
-จุดที่ต้องแก้:
-...
-
-Flow:
-...
-
-Pseudocode:
-...
-
-Patch แบบแบ่งส่วน:
-...
-
-ทำไมจึงเลือกวิธีนี้:
+สิ่งที่ควรเห็นหลังทำเสร็จ:
 ...
 
 วิธีทดสอบ:
 ...
 
-โจทย์ต่อยอดให้ลองแก้เอง:
+แนวคิด Python/ระบบที่ควรรู้:
+- ...
+
+ถ้าเจอ error:
+ส่ง error เต็ม ๆ และ code รอบบรรทัดที่แจ้งปัญหามาได้
+
+ทำ step นี้เสร็จแล้วพิมพ์ `ต่อ` เพื่อไป step ถัดไป
+```
+
+เมื่อผู้ใช้พิมพ์ `ต่อ` ให้สรุปผล step ก่อนหน้าแบบสั้น ๆ แล้วใช้ template เดิมสำหรับ step ถัดไป ห้ามแสดงหลาย step ล่วงหน้า
+
+ถ้าผู้ใช้ส่ง error หรือ output แทน `ต่อ` ให้ใช้รูปแบบนี้:
+
+```text
+Step ที่กำลังตรวจ:
 ...
+
+สิ่งที่ output/error บอก:
+...
+
+สาเหตุที่เป็นไปได้:
+...
+
+วิธีตรวจทีละข้อ:
+...
+
+Patch ของ step ปัจจุบัน:
+...
+
+วิธีทดสอบหลังแก้:
+...
+
+เมื่อ step ผ่านแล้ว ให้พิมพ์ `ต่อ`
 ```
 
 จุดประสงค์ของ LogSense ไม่ใช่แค่มีระบบที่รันได้ แต่คือการทำให้ผู้พัฒนาสามารถอธิบายระบบตรวจจับ anomaly ได้อย่างมีเหตุผล ตั้งแต่ raw log ไปจนถึง incident, evidence, evaluation และข้อจำกัดของระบบ
-

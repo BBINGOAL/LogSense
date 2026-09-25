@@ -1,0 +1,4 @@
+{"timestamp":"2026-09-22T10:00:00Z","service":"auth","level":"ERROR","message":"login failed"}
+{"timestamp":"2026-09-22T10:00:01Z","service":"auth","level":"INFO","message":"login succeeded"}
+{"service":"auth","level":"ERROR","message":"broken"
+{"timestamp":"2026-09-22T10:00:02","service":"auth","level":"INFO","message":"timezone missing"}
