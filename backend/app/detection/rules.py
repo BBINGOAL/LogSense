@@ -1,3 +1,5 @@
+from math import isfinite
+
 import pandas as pd
 
 
@@ -5,6 +7,13 @@ def apply_error_rate_rule(
     metrics: pd.DataFrame,
     threshold: float = 0.5,
 ) -> pd.DataFrame:
+    if (
+        not isfinite(threshold)
+        or not 0.0 <= threshold <= 1.0
+    ):
+        raise ValueError(
+            "error rate threshold must be between 0.0 and 1.0"
+        )
     result = metrics.copy()
     result["is_anomaly"] = result["error_rate"] >= threshold
     return result
@@ -14,6 +23,13 @@ def apply_latency_rule(
     metrics: pd.DataFrame,
     threshold_ms: float = 500.0,
 ) -> pd.DataFrame:
+    if (
+        not isfinite(threshold_ms)
+        or threshold_ms < 0.0
+    ):
+        raise ValueError(
+            "latency threshold must be a non-negative finite number"
+        )
     result = metrics.copy()
     result["is_anomaly"] = (
         result["p95_latency_ms"]

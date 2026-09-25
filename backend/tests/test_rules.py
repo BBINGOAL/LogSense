@@ -27,6 +27,22 @@ class TestApplyErrorRateRule(unittest.TestCase):
             [False, True, True],
         )
 
+    def test_rejects_error_rate_threshold_above_one(self):
+        metrics = pd.DataFrame(
+            {
+                "error_rate": [0.5],
+            }
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "between 0.0 and 1.0",
+        ):
+            apply_error_rate_rule(
+                metrics,
+                threshold=1.1,
+            )
+
 
 class TestApplyLatencyRule(unittest.TestCase):
     def test_marks_high_latency_as_anomaly(self):
@@ -50,6 +66,22 @@ class TestApplyLatencyRule(unittest.TestCase):
             result["is_anomaly"].tolist(),
             [False, True, True, False],
         )
+
+    def test_rejects_negative_latency_threshold(self):
+        metrics = pd.DataFrame(
+            {
+                "p95_latency_ms": [100.0],
+            }
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "non-negative",
+        ):
+            apply_latency_rule(
+                metrics,
+                threshold_ms=-1.0,
+            )
 
 
 class TestApplyBaselineRules(unittest.TestCase):
@@ -83,5 +115,21 @@ class TestApplyBaselineRules(unittest.TestCase):
                 "high_error_rate,high_latency",
             ],
         )
+
+    def test_handles_empty_metrics(self):
+        metrics = pd.DataFrame(
+            {
+                "error_rate": pd.Series(dtype="Float64"),
+                "p95_latency_ms": pd.Series(dtype="Float64"),
+            }
+        )
+
+        result = apply_baseline_rules(metrics)
+
+        self.assertTrue(result.empty)
+        self.assertIn("is_anomaly", result.columns)
+        self.assertIn("anomaly_reason", result.columns)
+
+
 if __name__ == "__main__":
     unittest.main()
