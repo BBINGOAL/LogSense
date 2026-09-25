@@ -4,7 +4,7 @@ LogSense is a learning project for analyzing application logs and detecting anom
 
 ## Current progress
 
-Phase 3 — Pandas and time-window metrics
+Phase 4 - Rule-based anomaly detection
 
 The current program can:
 
@@ -15,7 +15,11 @@ The current program can:
 - Group logs by service and configurable time windows
 - Calculate request count, error count, and error rate
 - Calculate mean and p95 latency
-- Return a stable metric schema for empty input
+- Detect high error rates using a configurable threshold
+- Detect high p95 latency using a configurable threshold
+- Combine multiple rule results into one anomaly decision
+- Preserve the rule reasons for each detected anomaly
+- Reject invalid threshold values
 - Report parse failures with source line numbers
 
 ## Current data flow
@@ -27,9 +31,17 @@ sample.jsonl
     -> typed Pandas DataFrame
     -> group by service and time window
     -> request, error, and latency metrics
+    -> error-rate and p95-latency rules
+    -> anomaly flag and evidence-based reason
 ```
 
 This flow uses deterministic Python and Pandas logic. It does not use machine learning or an LLM.
+
+## Default anomaly rules
+
+- Error rate greater than or equal to `0.5`
+- P95 latency greater than or equal to `500 ms`
+- Missing latency is not treated as a latency anomaly
 
 ## Requirements
 
@@ -70,7 +82,7 @@ python -m unittest discover -v
 ## Current limitations
 
 - Field value types are not fully validated yet
-- Metrics are calculated in memory and are not stored in a database
-- Rule-based anomaly detection is not implemented yet
+- Metrics and detection results are stored only in memory
+- Rule thresholds are configured manually and do not learn from historical data
 - Machine-learning anomaly detection is not implemented yet
 - Evaluation metrics and labeled datasets are not implemented yet
