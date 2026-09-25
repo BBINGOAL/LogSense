@@ -62,6 +62,5 @@ class TestRecordsToDataFrame(unittest.TestCase):
         self.assertEqual(str(frame["level"].dtype), "string")
         self.assertEqual(str(frame["status_code"].dtype), "Int64")
         self.assertEqual(str(frame["latency_ms"].dtype), "Float64")
-    
 if __name__ == "__main__":
     unittest.main()
