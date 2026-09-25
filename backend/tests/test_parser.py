@@ -1,6 +1,5 @@
 import unittest
 
-from backend.app.parsing.parser import parse_log_record
 from backend.app.parsing.parser import LogParseError, parse_log_record
 
 class TestParseLogRecord(unittest.TestCase):
@@ -26,9 +25,39 @@ class TestParseLogRecord(unittest.TestCase):
 
     def test_raises_log_parse_error_for_malformed_json(self):
         raw_line = '{"timestamp":"2026-09-22T10:00:00Z"'
-
         with self.assertRaisesRegex(LogParseError, "invalid JSON"):
             parse_log_record(raw_line)
             
+    def test_raises_log_parse_error_for_missing_timestamp(self):
+        raw_line = (
+            '{"service":"auth","level":"ERROR",'
+            '"message":"login failed"}'
+        )
+
+        with self.assertRaisesRegex(
+            LogParseError,
+            "missing required field: timestamp",
+        ):
+            parse_log_record(raw_line)
+    def test_raises_log_parse_error_for_invalid_timestamp(self):
+        raw_line = (
+            '{"timestamp":"not-a-timestamp","service":"auth",'
+            '"level":"ERROR","message":"login failed"}'
+        )
+
+        with self.assertRaisesRegex(LogParseError, "invalid timestamp"):
+            parse_log_record(raw_line)
+
+    def test_raises_log_parse_error_when_timestamp_has_no_timezone(self):
+        raw_line = (
+            '{"timestamp":"2026-09-22T10:00:00","service":"auth",'
+            '"level":"ERROR","message":"login failed"}'
+        )
+
+        with self.assertRaisesRegex(
+            LogParseError,
+            "timestamp must include timezone",
+        ):
+            parse_log_record(raw_line)
 if __name__ == "__main__":
     unittest.main()

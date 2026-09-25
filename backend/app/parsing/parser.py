@@ -1,21 +1,28 @@
 import json
 from datetime import datetime, timezone
-
 from .models import NormalizedLogRecord
+
+REQUIRED_FIELDS = ("timestamp", "service", "level", "message")
 
 class LogParseError(ValueError):
     pass
 
-#return เป็น class ที่ normalize เเล้ว  
 def parse_log_record(raw_line: str) -> NormalizedLogRecord:
     try:
         data = json.loads(raw_line)
     except json.JSONDecodeError as error:
         raise LogParseError(f"invalid JSON: {error.msg}") from error
 
-    timestamp = datetime.fromisoformat(data["timestamp"])
+    for field in REQUIRED_FIELDS:
+        if field not in data:
+            raise LogParseError(f"missing required field: {field}")
+    try:
+        timestamp = datetime.fromisoformat(data["timestamp"])
+    except (TypeError, ValueError) as error:
+        raise LogParseError("invalid timestamp") from error
+
     if timestamp.tzinfo is None:
-        raise ValueError("timestamp must include timezone")
+        raise LogParseError("timestamp must include timezone")
 
     return NormalizedLogRecord(
         timestamp=timestamp.astimezone(timezone.utc),
