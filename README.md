@@ -4,24 +4,29 @@ LogSense is a learning project for analyzing application logs and detecting anom
 
 ## Current progress
 
-Phase 1 — Python and log fundamentals
+Phase 2 — Structured log parser
 
 The current program can:
 
 - Read JSON Lines (`.jsonl`) one record at a time
-- Convert JSON text into a Python dictionary
-- Convert timestamps with a timezone to UTC
-- Report malformed JSON with its source line number
-- Report timestamps that do not contain timezone information
+- Parse valid JSON into a `NormalizedLogRecord`
+- Normalize timestamps to UTC
+- Normalize log levels to uppercase
+- Support optional request ID, status code, and latency fields
+- Report malformed JSON and missing required fields
+- Report invalid timestamps and missing timezone information
+- Preserve the source line number when reporting file errors
 
 ## Current data flow
 
 ```text
 sample.jsonl
-    -> read one line
+    -> read one source line
     -> parse JSON
-    -> convert timestamp to UTC
-    -> print normalized output or parse error
+    -> validate required fields
+    -> normalize timestamp and log level
+    -> NormalizedLogRecord
+    -> print normalized output or parse failure
 ```
 
 This flow uses deterministic Python logic. It does not use machine learning or an LLM.
@@ -53,12 +58,12 @@ python read_log.py
 ## Tests
 
 ```powershell
-python -m unittest test_read_log.py -v
+python -m unittest discover -v
 ```
 
 ## Current limitations
 
-- Required log fields are not validated yet
-- Invalid timestamp formats are not handled yet
+- Field value types are not fully validated yet
 - Parsed records are not stored in a database
+- Time-window metrics are not implemented yet
 - Anomaly detection is not implemented yet
