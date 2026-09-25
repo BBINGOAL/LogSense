@@ -1,10 +1,33 @@
 import pandas as pd
 
+METRIC_COLUMNS = (
+    "window_start",
+    "service",
+    "request_count",
+    "error_count",
+    "error_rate",
+    "mean_latency_ms",
+    "p95_latency_ms",
+)
 
 def build_window_metrics(
     frame: pd.DataFrame,
     window: str = "5min",
 ) -> pd.DataFrame:
+    if frame.empty:
+        return pd.DataFrame(
+            {
+                "window_start": pd.Series(
+                    dtype="datetime64[ns, UTC]"
+                ),
+                "service": pd.Series(dtype="string"),
+                "request_count": pd.Series(dtype="Int64"),
+                "error_count": pd.Series(dtype="Int64"),
+                "error_rate": pd.Series(dtype="Float64"),
+                "mean_latency_ms": pd.Series(dtype="Float64"),
+                "p95_latency_ms": pd.Series(dtype="Float64"),
+            }
+        )
     working_frame = frame.assign(
         is_error=frame["level"].eq("ERROR")
     )
@@ -30,14 +53,4 @@ def build_window_metrics(
         metrics["error_count"] / metrics["request_count"]
     )
 
-    return metrics[
-        [
-            "window_start",
-            "service",
-            "request_count",
-            "error_count",
-            "error_rate",
-            "mean_latency_ms",
-            "p95_latency_ms",
-        ]
-    ]
+    return metrics[list(METRIC_COLUMNS)]

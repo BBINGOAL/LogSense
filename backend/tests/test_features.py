@@ -2,7 +2,9 @@ import unittest
 from datetime import datetime, timezone
 
 from backend.app.metrics.dataframe import records_to_dataframe
-from backend.app.metrics.features import build_window_metrics
+from backend.app.metrics.features import (
+    METRIC_COLUMNS,
+    build_window_metrics)
 from backend.app.parsing.models import NormalizedLogRecord
 
 
@@ -71,7 +73,42 @@ class TestBuildWindowMetrics(unittest.TestCase):
                 "2026-09-22T10:05:00+00:00",
             ],
         )
+    def test_empty_frame_returns_empty_metric_schema(self):
+        frame = records_to_dataframe([])
 
+        metrics = build_window_metrics(frame)
 
+        self.assertTrue(metrics.empty)
+        self.assertEqual(
+            list(metrics.columns),
+            list(METRIC_COLUMNS),
+        )
+        self.assertEqual(
+            str(metrics["window_start"].dt.tz),
+            "UTC",
+        )
+    def test_preserves_counts_when_latency_is_missing(self):
+        record = NormalizedLogRecord(
+            timestamp=datetime(
+                2026,
+                9,
+                22,
+                10,
+                1,
+                tzinfo=timezone.utc,
+            ),
+            service="auth",
+            level="ERROR",
+            message="login failed",
+        )
+        frame = records_to_dataframe([record])
+
+        metrics = build_window_metrics(frame)
+
+        self.assertEqual(metrics["request_count"].tolist(), [1])
+        self.assertEqual(metrics["error_count"].tolist(), [1])
+        self.assertEqual(metrics["error_rate"].tolist(), [1.0])
+        self.assertTrue(metrics["mean_latency_ms"].isna().all())
+        self.assertTrue(metrics["p95_latency_ms"].isna().all())
 if __name__ == "__main__":
     unittest.main()
