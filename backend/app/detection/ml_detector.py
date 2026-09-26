@@ -51,3 +51,31 @@ def train_isolation_forest(
 
     detector.fit(features)
     return detector
+
+
+def score_isolation_forest(
+    detector: Pipeline,
+    metrics: pd.DataFrame,
+) -> pd.DataFrame:
+    result = metrics.copy()
+
+    if metrics.empty:
+        result["anomaly_score"] = pd.Series(
+            index=result.index,
+            dtype="Float64",
+        )
+        result["ml_is_anomaly"] = pd.Series(
+            index=result.index,
+            dtype="boolean",
+        )
+        return result
+
+    features = select_model_features(metrics)
+
+    predictions = detector.predict(features)
+    anomaly_scores = -detector.decision_function(features)
+
+    result["anomaly_score"] = anomaly_scores
+    result["ml_is_anomaly"] = predictions == -1
+
+    return result
