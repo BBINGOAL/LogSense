@@ -207,6 +207,35 @@ class TestGroupAnomaliesIntoIncidents(unittest.TestCase):
             "valid timestamps",
         ):
             group_anomalies_into_incidents(detections)
+    def test_groups_nullable_string_service_dtype(self):
+        started_at = datetime(
+            2026,
+            9,
+            22,
+            10,
+            0,
+            tzinfo=timezone.utc,
+        )
+        detections = pd.DataFrame(
+            {
+                "window_start": [started_at],
+                "service": ["auth"],
+                "is_anomaly": [True],
+                "anomaly_reason": ["high_error_rate"],
+            }
+        ).astype(
+            {
+                "service": "string",
+                "is_anomaly": "boolean",
+                "anomaly_reason": "string",
+            }
+        )
+
+        incidents = group_anomalies_into_incidents(detections)
+
+        self.assertEqual(len(incidents), 1)
+        self.assertEqual(incidents[0].service, "auth")
+        self.assertEqual(incidents[0].anomaly_count, 1)
 
 
 if __name__ == "__main__":

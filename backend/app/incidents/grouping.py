@@ -100,14 +100,16 @@ def group_anomalies_into_incidents(
         ["service", "window_start"]
     )
 
-    service_changed = anomalies["service"].ne(
-        anomalies["service"].shift()
+    service_changed = (
+        anomalies["service"]
+        .ne(anomalies["service"].shift())
+        .fillna(True)
     )
     time_gap = (
         anomalies["window_start"]
         - anomalies["window_start"].shift()
     )
-    gap_exceeded = time_gap.gt(max_gap)
+    gap_exceeded = time_gap.gt(max_gap).fillna(False)
 
     anomalies["_incident_group"] = (
         service_changed | gap_exceeded
