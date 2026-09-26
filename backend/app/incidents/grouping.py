@@ -7,6 +7,13 @@ from backend.app.incidents.models import (
     IncidentSeverity,
 )
 
+REQUIRED_DETECTION_COLUMNS = (
+    "window_start",
+    "service",
+    "is_anomaly",
+    "anomaly_reason",
+)
+
 
 def _severity_for_count(
     anomaly_count: int,
@@ -55,6 +62,23 @@ def group_anomalies_into_incidents(
     detections: pd.DataFrame,
     max_gap: timedelta = timedelta(minutes=10),
 ) -> list[Incident]:
+    missing_columns = [
+        column
+        for column in REQUIRED_DETECTION_COLUMNS
+        if column not in detections.columns
+    ]
+
+    if missing_columns:
+        missing_text = ", ".join(missing_columns)
+        raise ValueError(
+            f"missing detection columns: {missing_text}"
+        )
+
+    if max_gap <= timedelta(0):
+        raise ValueError(
+            "max_gap must be greater than zero"
+        )
+
     anomalies = detections.loc[
         detections["is_anomaly"].fillna(False)
     ].copy()
@@ -62,10 +86,16 @@ def group_anomalies_into_incidents(
     if anomalies.empty:
         return []
 
-    anomalies["window_start"] = pd.to_datetime(
-        anomalies["window_start"],
-        utc=True,
-    )
+    try:
+        anomalies["window_start"] = pd.to_datetime(
+            anomalies["window_start"],
+            utc=True,
+        )
+    except (TypeError, ValueError) as error:
+        raise ValueError(
+            "anomaly window_start must contain valid timestamps"
+        ) from error
+
     anomalies = anomalies.sort_values(
         ["service", "window_start"]
     )

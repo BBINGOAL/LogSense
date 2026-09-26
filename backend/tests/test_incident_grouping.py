@@ -108,6 +108,7 @@ class TestGroupAnomaliesIntoIncidents(unittest.TestCase):
             incidents_by_service["payment"].evidence_indices,
             (0, 2),
         )
+
     def test_groups_gap_equal_to_maximum(self):
         started_at = datetime(
             2026,
@@ -156,6 +157,57 @@ class TestGroupAnomaliesIntoIncidents(unittest.TestCase):
         incidents = group_anomalies_into_incidents(detections)
 
         self.assertEqual(incidents, [])
+
+    def test_rejects_missing_detection_columns(self):
+        detections = pd.DataFrame(
+            {
+                "is_anomaly": [True],
+            }
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "missing detection columns",
+        ):
+            group_anomalies_into_incidents(detections)
+
+    def test_rejects_non_positive_max_gap(self):
+        detections = pd.DataFrame(
+            {
+                "window_start": [
+                    "2026-09-26T10:00:00Z",
+                ],
+                "service": ["auth"],
+                "is_anomaly": [True],
+                "anomaly_reason": ["high_error_rate"],
+            }
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "greater than zero",
+        ):
+            group_anomalies_into_incidents(
+                detections,
+                max_gap=timedelta(0),
+            )
+
+    def test_rejects_invalid_anomaly_timestamp(self):
+        detections = pd.DataFrame(
+            {
+                "window_start": ["not-a-timestamp"],
+                "service": ["auth"],
+                "is_anomaly": [True],
+                "anomaly_reason": ["high_error_rate"],
+            }
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "valid timestamps",
+        ):
+            group_anomalies_into_incidents(detections)
+
 
 if __name__ == "__main__":
     unittest.main()
