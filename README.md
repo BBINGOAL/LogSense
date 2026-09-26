@@ -4,7 +4,7 @@ LogSense is a learning project for analyzing application logs and detecting anom
 
 ## Current progress
 
-Phase 4 - Rule-based anomaly detection
+Phase 5 - Isolation Forest and evaluation
 
 The current program can:
 
@@ -21,27 +21,51 @@ The current program can:
 - Preserve the rule reasons for each detected anomaly
 - Reject invalid threshold values
 - Report parse failures with source line numbers
+- Select numerical features for machine-learning detection
+- Fill missing latency using training-data medians
+- Train and score an Isolation Forest with reproducible settings
+- Calculate precision, recall, F1-score, and false positives
+- Compare Isolation Forest with the rule-based baseline
 
 ## Current data flow
 
 ```text
-sample.jsonl
-    -> parse and validate each log
-    -> NormalizedLogRecord
+JSONL logs
+    -> parser and normalization
     -> typed Pandas DataFrame
-    -> group by service and time window
-    -> request, error, and latency metrics
-    -> error-rate and p95-latency rules
-    -> anomaly flag and evidence-based reason
+    -> time-window metrics
+        ├── rule-based thresholds
+        │     -> rule prediction and reason
+        └── model feature selection
+              -> median imputation
+              -> Isolation Forest
+              -> anomaly score and ML prediction
+
+labeled evaluation metrics
+    -> compare predictions with ground truth
+    -> precision, recall, F1-score, and false positives
 ```
 
-This flow uses deterministic Python and Pandas logic. It does not use machine learning or an LLM.
+Parsing, metrics, and rule detection use deterministic logic.
+Isolation Forest provides the machine-learning detection branch.
+The project does not use an LLM yet.
 
 ## Default anomaly rules
 
 - Error rate greater than or equal to `0.5`
 - P95 latency greater than or equal to `500 ms`
 - Missing latency is not treated as a latency anomaly
+
+## Default model settings
+
+- Features: request count, error rate, mean latency, and p95 latency
+- Missing latency strategy: training-data median
+- Contamination: `0.1`
+- Random state: `42`
+- Feature scaling: not required for the tree-based detector
+
+See [Detector evaluation](docs/evaluation.md) for the current
+synthetic-data comparison and limitations.
 
 ## Requirements
 
@@ -83,6 +107,8 @@ python -m unittest discover -v
 
 - Field value types are not fully validated yet
 - Metrics and detection results are stored only in memory
-- Rule thresholds are configured manually and do not learn from historical data
-- Machine-learning anomaly detection is not implemented yet
-- Evaluation metrics and labeled datasets are not implemented yet
+- Rule thresholds are configured manually
+- ML evaluation uses a small synthetic labeled dataset
+- There is no held-out real-world labeled dataset yet
+- Isolation Forest is not connected to `read_log.py` because the sample produces only one metric window
+- Detector performance has not been validated across different services or time ranges
