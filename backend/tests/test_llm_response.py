@@ -2,7 +2,9 @@ import json
 import unittest
 
 from backend.app.llm_analysis.response import (
+    AnalysisMetadata,
     AnalysisResponse,
+    AnalysisResult,
     parse_analysis_response,
 )
 
@@ -69,6 +71,35 @@ class TestParseAnalysisResponse(unittest.TestCase):
             "observed_facts must be a list",
         ):
             parse_analysis_response(raw_response)
+
+
+class TestAnalysisResult(unittest.TestCase):
+    def test_stores_response_with_traceability_metadata(self):
+        metadata = AnalysisMetadata(
+            incident_id="auth-20260927T100000Z",
+            detector_name="rule_based",
+            model="gemini-3.8-flash",
+            prompt_version="incident-analysis-v2",
+            evidence_indices=(7, 8),
+        )
+        response = AnalysisResponse(
+            observed_facts=("The error rate was 0.6.",),
+            likely_explanation="Requests may be failing.",
+            uncertainty="No stack trace was supplied.",
+            recommended_next_checks=("Inspect error logs.",),
+        )
+
+        result = AnalysisResult(
+            metadata=metadata,
+            response=response,
+        )
+
+        self.assertEqual(
+            result.metadata.incident_id,
+            "auth-20260927T100000Z",
+        )
+        self.assertEqual(result.metadata.evidence_count, 2)
+        self.assertIs(result.response, response)
 
 
 if __name__ == "__main__":

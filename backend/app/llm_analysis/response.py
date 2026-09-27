@@ -34,6 +34,25 @@ class AnalysisResponse:
     recommended_next_checks: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class AnalysisMetadata:
+    incident_id: str
+    detector_name: str
+    model: str
+    prompt_version: str
+    evidence_indices: tuple[int, ...]
+
+    @property
+    def evidence_count(self) -> int:
+        return len(self.evidence_indices)
+
+
+@dataclass(frozen=True)
+class AnalysisResult:
+    metadata: AnalysisMetadata
+    response: AnalysisResponse
+
+
 def _require_string(
     payload: dict[str, object],
     field_name: str,
