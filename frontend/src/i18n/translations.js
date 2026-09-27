@@ -1,0 +1,77 @@
+export const dateLocales = {
+  th: 'th-TH-u-ca-gregory',
+  en: 'en-GB',
+}
+
+export const translations = {
+  th: {
+    languageSelector: 'เลือกภาษา',
+    dashboardTitle: 'แดชบอร์ดเหตุการณ์ผิดปกติ',
+    dashboardDescription:
+      'ตรวจสอบความผิดปกติ หลักฐาน และคำอธิบายที่สร้างโดย AI',
+    localMockData: 'ข้อมูลจำลองในเครื่อง',
+    monitoring: 'การเฝ้าระวัง',
+    incidents: 'เหตุการณ์',
+    selectedIncident: 'เหตุการณ์ที่เลือก',
+    metricEvidence: 'หลักฐานจากเมตริก',
+    requests: 'คำขอทั้งหมด',
+    errors: 'ข้อผิดพลาด',
+    errorRate: 'อัตราข้อผิดพลาด',
+    p95Latency: 'เวลาแฝง P95',
+    geminiAnalysis: 'การวิเคราะห์โดย Gemini',
+    evidenceBasedExplanation: 'คำอธิบายจากหลักฐาน',
+    observedFacts: 'ข้อเท็จจริงที่พบ',
+    likelyExplanation: 'คำอธิบายที่เป็นไปได้',
+    uncertainty: 'ความไม่แน่นอน',
+    recommendedNextChecks: 'สิ่งที่ควรตรวจสอบต่อ',
+    detector: 'ตัวตรวจจับ',
+    prompt: 'พรอมต์',
+    evidenceRows: 'แถวหลักฐาน',
+    analysisSourceNote:
+      'เนื้อหาการวิเคราะห์ด้านล่างเป็นต้นฉบับภาษาอังกฤษ',
+    severity: {
+      low: 'ต่ำ',
+      medium: 'ปานกลาง',
+      high: 'สูง',
+    },
+    status: {
+      open: 'กำลังตรวจสอบ',
+      resolved: 'แก้ไขแล้ว',
+    },
+  },
+  en: {
+    languageSelector: 'Select language',
+    dashboardTitle: 'Incident Dashboard',
+    dashboardDescription:
+      'Review detected anomalies, supporting evidence, and AI-generated explanations.',
+    localMockData: 'Local mock data',
+    monitoring: 'Monitoring',
+    incidents: 'Incidents',
+    selectedIncident: 'Selected incident',
+    metricEvidence: 'Metric evidence',
+    requests: 'Requests',
+    errors: 'Errors',
+    errorRate: 'Error rate',
+    p95Latency: 'P95 latency',
+    geminiAnalysis: 'Gemini analysis',
+    evidenceBasedExplanation: 'Evidence-based explanation',
+    observedFacts: 'Observed facts',
+    likelyExplanation: 'Likely explanation',
+    uncertainty: 'Uncertainty',
+    recommendedNextChecks: 'Recommended next checks',
+    detector: 'Detector',
+    prompt: 'Prompt',
+    evidenceRows: 'Evidence rows',
+    analysisSourceNote:
+      'The analysis below is the canonical English response.',
+    severity: {
+      low: 'Low',
+      medium: 'Medium',
+      high: 'High',
+    },
+    status: {
+      open: 'Open',
+      resolved: 'Resolved',
+    },
+  },
+}
