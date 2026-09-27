@@ -46,4 +46,51 @@ export const mockIncidentRecords = [
       },
     },
   },
+  {
+    incident: {
+      incident_id: 'payment-20260927T101500Z',
+      service: 'payment',
+      started_at: '2026-09-27T10:15:00+00:00',
+      ended_at: '2026-09-27T10:15:00+00:00',
+      severity: 'low',
+      triggers: ['high_latency'],
+      evidence_indices: [12],
+      status: 'resolved',
+    },
+    metric_windows: [
+      {
+        window_start: '2026-09-27T10:15:00+00:00',
+        request_count: 40,
+        error_count: 1,
+        error_rate: 0.025,
+        mean_latency_ms: 420,
+        p95_latency_ms: 780,
+        anomaly_reason: 'high_latency',
+        anomaly_score: null,
+      },
+    ],
+    analysis: {
+      metadata: {
+        incident_id: 'payment-20260927T101500Z',
+        detector_name: 'rule_based',
+        model: 'gemini-3.8-flash',
+        prompt_version: 'incident-analysis-v2',
+        evidence_indices: [12],
+      },
+      response: {
+        observed_facts: [
+          'The payment service p95 latency was 780 ms.',
+          'The error rate was 2.5%.',
+        ],
+        likely_explanation:
+          'The payment service experienced elevated response latency.',
+        uncertainty:
+          'No dependency traces or database metrics were supplied.',
+        recommended_next_checks: [
+          'Inspect payment dependency latency.',
+          'Review database query duration.',
+        ],
+      },
+    },
+  },
 ]

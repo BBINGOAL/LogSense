@@ -17,7 +17,14 @@ function formatTimestamp(timestamp, locale) {
 
 function App() {
   const [language, setLanguage] = useState('th')
-  const selectedRecord = mockIncidentRecords[0]
+  const [selectedIncidentId, setSelectedIncidentId] = useState(
+    mockIncidentRecords[0].incident.incident_id,
+  )
+  const selectedRecord =
+    mockIncidentRecords.find(
+      ({ incident }) =>
+        incident.incident_id === selectedIncidentId,
+    ) ?? mockIncidentRecords[0]
   const text = translations[language]
   const dateLocale = dateLocales[language]
 
@@ -74,42 +81,54 @@ function App() {
           </div>
 
           <div className="incident-list">
-            {mockIncidentRecords.map(({ incident }) => (
-              <article
-                className="incident-card incident-card--active"
-                key={incident.incident_id}
-              >
-                <div className="incident-card-header">
-                  <strong>{incident.service}</strong>
-                  <span
-                    className={`severity severity--${incident.severity}`}
-                  >
-                    {text.severity[incident.severity] ??
-                      incident.severity}
-                  </span>
-                </div>
+            {mockIncidentRecords.map(({ incident }) => {
+              const isSelected =
+                incident.incident_id === selectedIncidentId
 
-                <p className="incident-id">
-                  {incident.incident_id}
-                </p>
-
-                <time dateTime={incident.started_at}>
-                  {formatTimestamp(
-                    incident.started_at,
-                    dateLocale,
-                  )}{' '}
-                  UTC
-                </time>
-
-                <div className="trigger-list">
-                  {incident.triggers.map((trigger) => (
-                    <span className="trigger" key={trigger}>
-                      {trigger}
+              return (
+                <button
+                  type="button"
+                  className={`incident-card${
+                    isSelected ? ' incident-card--active' : ''
+                  }`}
+                  aria-pressed={isSelected}
+                  key={incident.incident_id}
+                  onClick={() =>
+                    setSelectedIncidentId(incident.incident_id)
+                  }
+                >
+                  <div className="incident-card-header">
+                    <strong>{incident.service}</strong>
+                    <span
+                      className={`severity severity--${incident.severity}`}
+                    >
+                      {text.severity[incident.severity] ??
+                        incident.severity}
                     </span>
-                  ))}
-                </div>
-              </article>
-            ))}
+                  </div>
+
+                  <p className="incident-id">
+                    {incident.incident_id}
+                  </p>
+
+                  <time dateTime={incident.started_at}>
+                    {formatTimestamp(
+                      incident.started_at,
+                      dateLocale,
+                    )}{' '}
+                    UTC
+                  </time>
+
+                  <div className="trigger-list">
+                    {incident.triggers.map((trigger) => (
+                      <span className="trigger" key={trigger}>
+                        {trigger}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </aside>
 
