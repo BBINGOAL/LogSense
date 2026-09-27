@@ -2,12 +2,16 @@ import os
 import unittest
 from unittest.mock import Mock, patch
 
+import pandas as pd
+
+from backend.app.incidents.models import Incident
 from backend.app.llm_analysis.gemini_client import (
     DEFAULT_GEMINI_MODEL,
 )
 from backend.app.llm_analysis.models import EvidenceBundle
 from backend.app.llm_analysis.response import AnalysisResponse
 from backend.app.llm_analysis.service import (
+    analyze_detected_incident,
     analyze_incident,
     create_gemini_client,
 )
@@ -78,6 +82,49 @@ class TestAnalyzeIncidentService(unittest.TestCase):
             bundle,
             create_interaction,
             DEFAULT_GEMINI_MODEL,
+        )
+
+    def test_builds_evidence_before_requesting_analysis(self):
+        incident = Mock(spec=Incident)
+        detections = pd.DataFrame()
+        bundle = Mock(spec=EvidenceBundle)
+        create_interaction = Mock()
+        expected = AnalysisResponse(
+            observed_facts=("A fact.",),
+            likely_explanation="A possible explanation.",
+            uncertainty="Evidence is limited.",
+            recommended_next_checks=("Check logs.",),
+        )
+
+        with (
+            patch(
+                "backend.app.llm_analysis.service."
+                "build_evidence_bundle",
+                return_value=bundle,
+            ) as build_bundle,
+            patch(
+                "backend.app.llm_analysis.service."
+                "analyze_incident",
+                return_value=expected,
+            ) as analyze_bundle,
+        ):
+            result = analyze_detected_incident(
+                incident,
+                detections,
+                "rule-based",
+                create_interaction=create_interaction,
+            )
+
+        self.assertEqual(result, expected)
+        build_bundle.assert_called_once_with(
+            incident,
+            detections,
+            "rule-based",
+        )
+        analyze_bundle.assert_called_once_with(
+            bundle,
+            DEFAULT_GEMINI_MODEL,
+            create_interaction,
         )
 
 
