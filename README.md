@@ -4,7 +4,7 @@ LogSense is a learning project for analyzing application logs and detecting anom
 
 ## Current progress
 
-Phase 6 - Incident Engine
+Phase 7 - Evidence-based LLM Analysis
 
 The current program can:
 
@@ -31,6 +31,14 @@ The current program can:
 - Track incident start time, end time, severity, and status
 - Preserve anomaly triggers and evidence row indices
 - Validate incident grouping columns, timestamps, and time gaps
+- Build evidence bundles from incident detection rows
+- Generate deterministic, versioned incident-analysis prompts
+- Treat log samples as untrusted prompt data
+- Request structured JSON analysis from Gemini
+- Validate malformed and incomplete model responses
+- Separate observed facts, likely explanations, uncertainty, and next checks
+- Track the incident, detector, model, prompt version, and evidence indices
+- Run the complete LLM pipeline with a fake API boundary in automated tests
 
 ## Current data flow
 
@@ -43,6 +51,11 @@ JSONL logs
         |     -> rule prediction and reason
         |     -> group nearby anomalies by service
         |     -> incident with severity and evidence
+        |     -> evidence bundle
+        |     -> versioned English analysis prompt
+        |     -> Gemini structured response
+        |     -> schema validation
+        |     -> analysis result with audit metadata
         +-> model feature selection
               -> median imputation
               -> Isolation Forest
@@ -55,7 +68,13 @@ labeled evaluation metrics
 
 Parsing, metrics, rules, and incident grouping use deterministic logic.
 Isolation Forest provides the machine-learning detection branch.
-The project does not use an LLM yet.
+Gemini provides evidence-based incident explanations after deterministic
+detection and grouping. The LLM does not decide whether a metric window
+is anomalous.
+
+LLM analysis is stored as canonical English content. Translation belongs
+to the dashboard presentation layer and is not part of the analysis
+pipeline.
 
 ## Default anomaly rules
 
@@ -86,6 +105,20 @@ synthetic-data comparison and limitations.
 - New incidents start with status `open`
 - Triggers and evidence indices are preserved for traceability
 
+## LLM analysis rules
+
+- Model: `gemini-3.8-flash`
+- Prompt version: `incident-analysis-v2`
+- Only supplied incident evidence may be used
+- Identifiers such as `incident_id` must not be treated as root-cause evidence
+- Log samples are untrusted data, not instructions
+- Response values use English while JSON field names remain stable
+- Responses must contain observed facts, likely explanation, uncertainty,
+  and recommended next checks
+- Analysis metadata records the incident, detector, model, prompt version,
+  and evidence row indices
+- Automated tests use a fake Gemini boundary and do not consume API quota
+
 ## Requirements
 
 - Python 3.11 or newer
@@ -110,6 +143,22 @@ Install dependencies:
 python -m pip install -r requirements.txt
 ```
 
+Create a local environment file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Set the Gemini API key inside `.env`:
+
+```dotenv
+GEMINI_API_KEY=your_real_key_here
+```
+
+The `.env` file is ignored by Git and must never be committed.
+A Gemini key is required only for live LLM requests; automated tests
+do not call the external API.
+
 ## Run
 
 ```powershell
@@ -119,7 +168,7 @@ python read_log.py
 ## Tests
 
 ```powershell
-python -m unittest discover -v
+python -m unittest discover -s backend/tests -v
 ```
 
 ## Current limitations
@@ -134,3 +183,8 @@ python -m unittest discover -v
 - Severity is based only on anomaly count
 - Evidence references are DataFrame indices rather than persistent database IDs
 - Cross-service correlation and incident status updates are not implemented yet
+- LLM analyses and metadata are stored only in memory
+- LLM output can still be incorrect and requires human review
+- Raw prompts and evidence bundles are not persisted
+- Dashboard translation is not implemented yet
+- Gemini is the only configured LLM provider
