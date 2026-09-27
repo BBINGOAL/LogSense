@@ -6,6 +6,7 @@ from unittest.mock import Mock
 
 from backend.app.incidents.models import Incident
 from backend.app.llm_analysis.gemini_client import (
+    DEFAULT_GEMINI_MODEL,
     analyze_incident_with_gemini,
 )
 from backend.app.llm_analysis.models import (
@@ -88,8 +89,28 @@ class TestAnalyzeIncidentWithGemini(unittest.TestCase):
             request["input"],
         )
         self.assertEqual(
-            result.observed_facts,
+            result.response.observed_facts,
             ("The auth error rate was 0.6.",),
+        )
+        self.assertEqual(
+            result.metadata.incident_id,
+            "auth-20260927T100000Z",
+        )
+        self.assertEqual(
+            result.metadata.detector_name,
+            "rule_based",
+        )
+        self.assertEqual(
+            result.metadata.model,
+            DEFAULT_GEMINI_MODEL,
+        )
+        self.assertEqual(
+            result.metadata.prompt_version,
+            "incident-analysis-v2",
+        )
+        self.assertEqual(
+            result.metadata.evidence_indices,
+            (0,),
         )
 
     def test_rejects_empty_model_response(self):

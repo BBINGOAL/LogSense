@@ -9,7 +9,7 @@ from backend.app.llm_analysis.gemini_client import (
     DEFAULT_GEMINI_MODEL,
 )
 from backend.app.llm_analysis.models import EvidenceBundle
-from backend.app.llm_analysis.response import AnalysisResponse
+from backend.app.llm_analysis.response import AnalysisResult
 from backend.app.llm_analysis.service import (
     analyze_detected_incident,
     analyze_incident,
@@ -60,12 +60,7 @@ class TestAnalyzeIncidentService(unittest.TestCase):
     def test_delegates_to_injected_interaction_creator(self):
         bundle = Mock(spec=EvidenceBundle)
         create_interaction = Mock()
-        expected = AnalysisResponse(
-            observed_facts=("A fact.",),
-            likely_explanation="A possible explanation.",
-            uncertainty="Evidence is limited.",
-            recommended_next_checks=("Check logs.",),
-        )
+        expected = Mock(spec=AnalysisResult)
 
         with patch(
             "backend.app.llm_analysis.service."
@@ -89,12 +84,7 @@ class TestAnalyzeIncidentService(unittest.TestCase):
         detections = pd.DataFrame()
         bundle = Mock(spec=EvidenceBundle)
         create_interaction = Mock()
-        expected = AnalysisResponse(
-            observed_facts=("A fact.",),
-            likely_explanation="A possible explanation.",
-            uncertainty="Evidence is limited.",
-            recommended_next_checks=("Check logs.",),
-        )
+        expected = Mock(spec=AnalysisResult)
 
         with (
             patch(

@@ -90,10 +90,18 @@ class TestLlmPipeline(unittest.TestCase):
             0.6,
         )
         self.assertEqual(
-            result.observed_facts,
+            result.response.observed_facts,
             ("The auth error rate was 0.6.",),
         )
         self.assertFalse(request["store"])
+        self.assertEqual(
+            result.metadata.incident_id,
+            incident.incident_id,
+        )
+        self.assertEqual(
+            result.metadata.evidence_indices,
+            (7,),
+        )
 
 
 if __name__ == "__main__":

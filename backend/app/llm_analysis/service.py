@@ -10,7 +10,7 @@ from backend.app.llm_analysis.gemini_client import (
     analyze_incident_with_gemini,
 )
 from backend.app.llm_analysis.models import EvidenceBundle
-from backend.app.llm_analysis.response import AnalysisResponse
+from backend.app.llm_analysis.response import AnalysisResult
 from backend.app.incidents.models import Incident
 from backend.app.llm_analysis.evidence import build_evidence_bundle
 
@@ -32,7 +32,7 @@ def analyze_incident(
     bundle: EvidenceBundle,
     model: str = DEFAULT_GEMINI_MODEL,
     create_interaction: InteractionCreator | None = None,
-) -> AnalysisResponse:
+) -> AnalysisResult:
     if create_interaction is None:
         client = create_gemini_client()
         create_interaction = client.interactions.create
@@ -50,7 +50,7 @@ def analyze_detected_incident(
     detector_name: str,
     model: str = DEFAULT_GEMINI_MODEL,
     create_interaction: InteractionCreator | None = None,
-) -> AnalysisResponse:
+) -> AnalysisResult:
     bundle = build_evidence_bundle(
         incident,
         detections,

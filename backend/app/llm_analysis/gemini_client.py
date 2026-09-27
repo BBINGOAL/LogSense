@@ -4,7 +4,8 @@ from backend.app.llm_analysis.models import EvidenceBundle
 from backend.app.llm_analysis.prompt import build_analysis_prompt
 from backend.app.llm_analysis.response import (
     ANALYSIS_RESPONSE_SCHEMA,
-    AnalysisResponse,
+    AnalysisMetadata,
+    AnalysisResult,
     parse_analysis_response,
 )
 
@@ -28,7 +29,7 @@ def analyze_incident_with_gemini(
     bundle: EvidenceBundle,
     create_interaction: InteractionCreator,
     model: str = DEFAULT_GEMINI_MODEL,
-) -> AnalysisResponse:
+) -> AnalysisResult:
     if not isinstance(model, str) or not model.strip():
         raise ValueError("model must be a non-empty string")
 
@@ -52,4 +53,16 @@ def analyze_incident_with_gemini(
             "Gemini returned an empty analysis response"
         )
 
-    return parse_analysis_response(raw_response)
+    response = parse_analysis_response(raw_response)
+    metadata = AnalysisMetadata(
+        incident_id=bundle.incident.incident_id,
+        detector_name=bundle.detector_name,
+        model=model,
+        prompt_version=prompt.version,
+        evidence_indices=bundle.incident.evidence_indices,
+    )
+
+    return AnalysisResult(
+        metadata=metadata,
+        response=response,
+    )
