@@ -4,7 +4,7 @@ LogSense is a learning project for analyzing application logs and detecting anom
 
 ## Current progress
 
-Phase 7 - Evidence-based LLM Analysis
+Phase 8 - React Dashboard
 
 The current program can:
 
@@ -39,6 +39,12 @@ The current program can:
 - Separate observed facts, likely explanations, uncertainty, and next checks
 - Track the incident, detector, model, prompt version, and evidence indices
 - Run the complete LLM pipeline with a fake API boundary in automated tests
+- Serve typed incident records from a FastAPI endpoint
+- Load dashboard data through a React API client
+- Display incident metrics, evidence timeline, and LLM analysis
+- Switch dashboard interface labels between Thai and English
+- Display loading, error, empty, and successful data states
+- Retry a failed dashboard API request
 
 ## Current data flow
 
@@ -75,6 +81,19 @@ is anomalous.
 LLM analysis is stored as canonical English content. Translation belongs
 to the dashboard presentation layer and is not part of the analysis
 pipeline.
+
+The Phase 8 dashboard currently consumes deterministic in-memory sample
+incident records through the API. This keeps the HTTP and UI flow
+testable before persistent storage is introduced.
+
+```text
+in-memory incident records
+    -> GET /api/incidents
+    -> React API client
+    -> loading / error / empty / success state
+    -> incident list and selected incident
+    -> metrics, evidence timeline, and LLM explanation
+```
 
 ## Default anomaly rules
 
@@ -122,6 +141,7 @@ synthetic-data comparison and limitations.
 ## Requirements
 
 - Python 3.11 or newer
+- Node.js 20.19 or newer
 
 ## Setup
 
@@ -143,6 +163,14 @@ Install dependencies:
 python -m pip install -r requirements.txt
 ```
 
+Install frontend dependencies:
+
+```powershell
+cd frontend
+npm install
+cd ..
+```
+
 Create a local environment file:
 
 ```powershell
@@ -159,7 +187,29 @@ The `.env` file is ignored by Git and must never be committed.
 A Gemini key is required only for live LLM requests; automated tests
 do not call the external API.
 
-## Run
+## Run the dashboard
+
+Start the backend API from the repository root:
+
+```powershell
+python -m uvicorn backend.app.api.main:app --reload
+```
+
+In a second terminal, start the React development server:
+
+```powershell
+cd frontend
+npm run dev
+```
+
+Open the local URL printed by Vite, normally
+`http://localhost:5173`. Vite proxies `/api` requests to the backend at
+`http://127.0.0.1:8000`.
+
+The API documentation is available while the backend is running at
+`http://127.0.0.1:8000/docs`.
+
+## Run the log parsing example
 
 ```powershell
 python read_log.py
@@ -169,6 +219,14 @@ python read_log.py
 
 ```powershell
 python -m unittest discover -s backend/tests -v
+```
+
+Check the frontend:
+
+```powershell
+cd frontend
+npm run lint
+npm run build
 ```
 
 ## Current limitations
@@ -186,5 +244,9 @@ python -m unittest discover -s backend/tests -v
 - LLM analyses and metadata are stored only in memory
 - LLM output can still be incorrect and requires human review
 - Raw prompts and evidence bundles are not persisted
-- Dashboard translation is not implemented yet
+- The dashboard API serves sample incident records and is not connected
+  to the full detection pipeline or a database yet
+- Thai/English switching translates interface labels, while canonical
+  LLM analysis remains in English
+- Frontend component tests are not configured yet
 - Gemini is the only configured LLM provider
