@@ -9,7 +9,19 @@ export const translations = {
     dashboardTitle: 'แดชบอร์ดเหตุการณ์ผิดปกติ',
     dashboardDescription:
       'ตรวจสอบความผิดปกติ หลักฐาน และคำอธิบายที่สร้างโดย AI',
-    localMockData: 'ข้อมูลจำลองในเครื่อง',
+    apiConnected: 'เชื่อมต่อ API แล้ว',
+    loadingData: 'กำลังโหลดข้อมูล',
+    apiUnavailable: 'เชื่อมต่อ API ไม่ได้',
+    loadingTitle: 'กำลังโหลดเหตุการณ์',
+    loadingDescription:
+      'กรุณารอสักครู่ ขณะที่ LogSense ดึงข้อมูลจาก API',
+    errorTitle: 'โหลดข้อมูลไม่สำเร็จ',
+    errorDescription:
+      'ตรวจสอบว่า backend API กำลังทำงาน แล้วลองอีกครั้ง',
+    retry: 'ลองใหม่',
+    emptyTitle: 'ยังไม่พบเหตุการณ์ผิดปกติ',
+    emptyDescription:
+      'API ทำงานตามปกติ แต่ยังไม่มี incident ให้แสดง',
     monitoring: 'การเฝ้าระวัง',
     incidents: 'เหตุการณ์',
     selectedIncident: 'เหตุการณ์ที่เลือก',
@@ -47,7 +59,19 @@ export const translations = {
     dashboardTitle: 'Incident Dashboard',
     dashboardDescription:
       'Review detected anomalies, supporting evidence, and AI-generated explanations.',
-    localMockData: 'Local mock data',
+    apiConnected: 'API connected',
+    loadingData: 'Loading data',
+    apiUnavailable: 'API unavailable',
+    loadingTitle: 'Loading incidents',
+    loadingDescription:
+      'Please wait while LogSense fetches data from the API.',
+    errorTitle: 'Unable to load incidents',
+    errorDescription:
+      'Check that the backend API is running, then try again.',
+    retry: 'Try again',
+    emptyTitle: 'No incidents detected',
+    emptyDescription:
+      'The API is available, but there are no incidents to display.',
     monitoring: 'Monitoring',
     incidents: 'Incidents',
     selectedIncident: 'Selected incident',

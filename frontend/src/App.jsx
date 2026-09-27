@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import DashboardState from './components/DashboardState.jsx'
 import IncidentDetail from './components/IncidentDetail.jsx'
-import { mockIncidentRecords } from './data/mockIncidents.js'
+import { useIncidentRecords } from './hooks/useIncidentRecords.js'
 import {
   dateLocales,
   translations,
@@ -17,16 +18,26 @@ function formatTimestamp(timestamp, locale) {
 
 function App() {
   const [language, setLanguage] = useState('th')
-  const [selectedIncidentId, setSelectedIncidentId] = useState(
-    mockIncidentRecords[0].incident.incident_id,
-  )
+  const [selectedIncidentId, setSelectedIncidentId] = useState(null)
+  const {
+    records,
+    status,
+    errorMessage,
+    retry,
+  } = useIncidentRecords()
   const selectedRecord =
-    mockIncidentRecords.find(
+    records.find(
       ({ incident }) =>
         incident.incident_id === selectedIncidentId,
-    ) ?? mockIncidentRecords[0]
+    ) ?? records[0]
   const text = translations[language]
   const dateLocale = dateLocales[language]
+  const dataStatusText =
+    status === 'loading'
+      ? text.loadingData
+      : status === 'error'
+        ? text.apiUnavailable
+        : text.apiConnected
 
   return (
     <div className="app-shell">
@@ -40,9 +51,9 @@ function App() {
         </div>
 
         <div className="header-actions">
-          <div className="data-status">
+          <div className={`data-status data-status--${status}`}>
             <span className="status-dot" />
-            {text.localMockData}
+            {dataStatusText}
           </div>
 
           <div
@@ -68,75 +79,91 @@ function App() {
       </header>
 
       <main className="dashboard-layout">
-        <aside className="panel incident-panel">
-          <div className="panel-header">
-            <div>
-              <p className="eyebrow">{text.monitoring}</p>
-              <h2>{text.incidents}</h2>
-            </div>
+        {status !== 'success' ? (
+          <DashboardState
+            status={status}
+            errorMessage={errorMessage}
+            text={text}
+            onRetry={retry}
+          />
+        ) : (
+          <>
+            <aside className="panel incident-panel">
+              <div className="panel-header">
+                <div>
+                  <p className="eyebrow">{text.monitoring}</p>
+                  <h2>{text.incidents}</h2>
+                </div>
 
-            <span className="incident-count">
-              {mockIncidentRecords.length}
-            </span>
-          </div>
+                <span className="incident-count">
+                  {records.length}
+                </span>
+              </div>
 
-          <div className="incident-list">
-            {mockIncidentRecords.map(({ incident }) => {
-              const isSelected =
-                incident.incident_id === selectedIncidentId
+              <div className="incident-list">
+                {records.map(({ incident }) => {
+                  const isSelected =
+                    incident.incident_id ===
+                    selectedRecord.incident.incident_id
 
-              return (
-                <button
-                  type="button"
-                  className={`incident-card${
-                    isSelected ? ' incident-card--active' : ''
-                  }`}
-                  aria-pressed={isSelected}
-                  key={incident.incident_id}
-                  onClick={() =>
-                    setSelectedIncidentId(incident.incident_id)
-                  }
-                >
-                  <div className="incident-card-header">
-                    <strong>{incident.service}</strong>
-                    <span
-                      className={`severity severity--${incident.severity}`}
+                  return (
+                    <button
+                      type="button"
+                      className={`incident-card${
+                        isSelected
+                          ? ' incident-card--active'
+                          : ''
+                      }`}
+                      aria-pressed={isSelected}
+                      key={incident.incident_id}
+                      onClick={() =>
+                        setSelectedIncidentId(
+                          incident.incident_id,
+                        )
+                      }
                     >
-                      {text.severity[incident.severity] ??
-                        incident.severity}
-                    </span>
-                  </div>
+                      <div className="incident-card-header">
+                        <strong>{incident.service}</strong>
+                        <span
+                          className={`severity severity--${incident.severity}`}
+                        >
+                          {text.severity[incident.severity] ??
+                            incident.severity}
+                        </span>
+                      </div>
 
-                  <p className="incident-id">
-                    {incident.incident_id}
-                  </p>
+                      <p className="incident-id">
+                        {incident.incident_id}
+                      </p>
 
-                  <time dateTime={incident.started_at}>
-                    {formatTimestamp(
-                      incident.started_at,
-                      dateLocale,
-                    )}{' '}
-                    UTC
-                  </time>
+                      <time dateTime={incident.started_at}>
+                        {formatTimestamp(
+                          incident.started_at,
+                          dateLocale,
+                        )}{' '}
+                        UTC
+                      </time>
 
-                  <div className="trigger-list">
-                    {incident.triggers.map((trigger) => (
-                      <span className="trigger" key={trigger}>
-                        {trigger}
-                      </span>
-                    ))}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-        </aside>
+                      <div className="trigger-list">
+                        {incident.triggers.map((trigger) => (
+                          <span className="trigger" key={trigger}>
+                            {trigger}
+                          </span>
+                        ))}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </aside>
 
-        <IncidentDetail
-          record={selectedRecord}
-          text={text}
-          dateLocale={dateLocale}
-        />
+            <IncidentDetail
+              record={selectedRecord}
+              text={text}
+              dateLocale={dateLocale}
+            />
+          </>
+        )}
       </main>
     </div>
   )

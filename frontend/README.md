@@ -1,16 +1,33 @@
-# React + Vite
+# LogSense frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The Phase 8 dashboard is a React application built with Vite. It loads
+incident records from `GET /api/incidents` and displays the selected
+incident's metrics, evidence timeline, and evidence-based LLM analysis.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Start the LogSense backend from the repository root first:
 
-## React Compiler
+```powershell
+python -m uvicorn backend.app.api.main:app --reload
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Then run the frontend in this directory:
 
-## Expanding the ESLint configuration
+```powershell
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Vite proxies `/api` to `http://127.0.0.1:8000` during development.
+
+## Checks
+
+```powershell
+npm run lint
+npm run build
+```
+
+The dashboard supports Thai and English interface labels. Gemini
+analysis content remains in canonical English so the stored analysis is
+not changed by presentation-language selection.

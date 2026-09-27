@@ -95,6 +95,16 @@
   box-shadow: 0 0 0 4px #d1fadf;
 }
 
+.data-status--loading .status-dot {
+  background: #f79009;
+  box-shadow: 0 0 0 4px #fef0c7;
+}
+
+.data-status--error .status-dot {
+  background: #f04438;
+  box-shadow: 0 0 0 4px #fee4e2;
+}
+
 .dashboard-layout {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
@@ -107,6 +117,78 @@
   border-radius: 18px;
   background: #ffffff;
   box-shadow: 0 12px 30px rgb(16 24 40 / 6%);
+}
+
+.dashboard-state {
+  grid-column: 1 / -1;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.dashboard-state h2 {
+  margin: 14px 0 8px;
+  color: #101828;
+}
+
+.dashboard-state p {
+  max-width: 520px;
+  margin: 0 auto;
+  color: #667085;
+  line-height: 1.6;
+}
+
+.state-symbol {
+  display: inline-grid;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  place-items: center;
+  color: #344054;
+  background: #eef2f6;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.state-symbol--error {
+  color: #b42318;
+  background: #fee4e2;
+}
+
+.state-symbol--empty {
+  color: #475467;
+  background: #f2f4f7;
+}
+
+.state-error-detail {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 16px auto 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: #b42318;
+  background: #fff1f0;
+  overflow-wrap: anywhere;
+}
+
+.retry-button {
+  margin-top: 18px;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #344054;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.retry-button:hover {
+  background: #1d2939;
+}
+
+.retry-button:focus-visible {
+  outline: 2px solid #6172f3;
+  outline-offset: 2px;
 }
 
 .incident-panel {
@@ -351,8 +433,9 @@
 }
 
 .uncertainty-block {
-  border: 1px solid #fedf89;
-  background: #fffaeb;
+  border: 1px solid #e4e7ec;
+  border-left: 4px solid #fdb022;
+  background: #fffdf5;
 }
 
 .analysis-block h4,
