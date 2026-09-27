@@ -1,5 +1,6 @@
 import './App.css'
 import { mockIncidentRecords } from './data/mockIncidents.js'
+import IncidentDetail from './components/IncidentDetail.jsx'
 
 function formatTimestamp(timestamp) {
   return new Intl.DateTimeFormat('en-GB', {
@@ -11,7 +12,6 @@ function formatTimestamp(timestamp) {
 
 function App() {
   const selectedRecord = mockIncidentRecords[0]
-  const selectedIncident = selectedRecord.incident
 
   return (
     <div className="app-shell">
@@ -79,17 +79,7 @@ function App() {
           </div>
         </aside>
 
-        <section className="panel detail-panel">
-          <p className="eyebrow">Selected incident</p>
-          <h2>{selectedIncident.service}</h2>
-          <p className="selected-incident-id">
-            {selectedIncident.incident_id}
-          </p>
-          <p className="detail-placeholder">
-            Metrics, evidence, and the Gemini analysis will appear
-            here in the next step.
-          </p>
-        </section>
+        <IncidentDetail record={selectedRecord} />
       </main>
     </div>
   )
