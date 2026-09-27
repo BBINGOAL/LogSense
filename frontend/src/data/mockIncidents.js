@@ -4,10 +4,10 @@ export const mockIncidentRecords = [
       incident_id: 'auth-20260927T100000Z',
       service: 'auth',
       started_at: '2026-09-27T10:00:00+00:00',
-      ended_at: '2026-09-27T10:05:00+00:00',
+      ended_at: '2026-09-27T10:10:00+00:00',
       severity: 'high',
       triggers: ['high_error_rate', 'high_latency'],
-      evidence_indices: [7],
+      evidence_indices: [7, 8, 9],
       status: 'open',
     },
     metric_windows: [
@@ -21,6 +21,26 @@ export const mockIncidentRecords = [
         anomaly_reason: 'high_error_rate, high_latency',
         anomaly_score: null,
       },
+      {
+        window_start: '2026-09-27T10:05:00+00:00',
+        request_count: 120,
+        error_count: 54,
+        error_rate: 0.45,
+        mean_latency_ms: 610,
+        p95_latency_ms: 1100,
+        anomaly_reason: 'high_latency',
+        anomaly_score: null,
+      },
+      {
+        window_start: '2026-09-27T10:10:00+00:00',
+        request_count: 90,
+        error_count: 18,
+        error_rate: 0.2,
+        mean_latency_ms: 300,
+        p95_latency_ms: 620,
+        anomaly_reason: 'high_latency',
+        anomaly_score: null,
+      },
     ],
     analysis: {
       metadata: {
@@ -28,12 +48,13 @@ export const mockIncidentRecords = [
         detector_name: 'rule_based',
         model: 'gemini-3.8-flash',
         prompt_version: 'incident-analysis-v2',
-        evidence_indices: [7],
+        evidence_indices: [7, 8, 9],
       },
       response: {
         observed_facts: [
-          'The auth service error rate was 65%.',
-          'The p95 latency was 1400 ms.',
+          'The auth incident contains three anomalous metric windows.',
+          'The error rate decreased from 65% to 20%.',
+          'The p95 latency decreased from 1400 ms to 620 ms.',
         ],
         likely_explanation:
           'The auth service experienced elevated failures and latency.',

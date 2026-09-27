@@ -299,6 +299,46 @@
   font-size: 1.15rem;
 }
 
+.timeline-table-wrapper {
+  overflow-x: auto;
+}
+
+.timeline-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #344054;
+  font-size: 0.82rem;
+}
+
+.timeline-table th,
+.timeline-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #eaecf0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.timeline-table th {
+  color: #667085;
+  background: #f8fafc;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.timeline-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.anomaly-reason {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #475467;
+  background: #eaecf0;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.72rem;
+}
+
 .analysis-block,
 .uncertainty-block {
   margin-top: 16px;

@@ -1,3 +1,5 @@
+import IncidentTimeline from './IncidentTimeline.jsx'
+
 function formatPercent(value) {
   return `${(value * 100).toFixed(0)}%`
 }
@@ -19,7 +21,7 @@ function MetricCard({ label, value }) {
   )
 }
 
-function IncidentDetail({ record, text }) {
+function IncidentDetail({ record, text, dateLocale }) {
   const { incident, metric_windows: metricWindows, analysis } = record
   const metric = metricWindows[0]
   const { metadata, response } = analysis
@@ -69,6 +71,12 @@ function IncidentDetail({ record, text }) {
           />
         </div>
       </section>
+
+      <IncidentTimeline
+        metricWindows={metricWindows}
+        text={text}
+        dateLocale={dateLocale}
+      />
 
       <section className="detail-section">
         <div className="section-heading">

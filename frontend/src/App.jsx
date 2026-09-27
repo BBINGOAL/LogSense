@@ -135,6 +135,7 @@ function App() {
         <IncidentDetail
           record={selectedRecord}
           text={text}
+          dateLocale={dateLocale}
         />
       </main>
     </div>
