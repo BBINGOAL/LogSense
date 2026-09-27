@@ -42,6 +42,8 @@ def analyze_incident(
         create_interaction,
         model,
     )
+
+
 def analyze_detected_incident(
     incident: Incident,
     detections: pd.DataFrame,

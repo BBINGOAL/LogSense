@@ -77,7 +77,7 @@ class TestLlmPipeline(unittest.TestCase):
 
         self.assertEqual(
             prompt_payload["prompt_version"],
-            "incident-analysis-v1",
+            "incident-analysis-v2",
         )
         self.assertEqual(
             prompt_payload["evidence"]["incident"]["incident_id"],

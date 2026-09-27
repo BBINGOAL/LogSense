@@ -56,6 +56,22 @@ class TestBuildAnalysisPrompt(unittest.TestCase):
 
         self.assertEqual(prompt.version, PROMPT_VERSION)
         self.assertEqual(
+            PROMPT_VERSION,
+            "incident-analysis-v2",
+        )
+        self.assertEqual(
+            payload["prompt_version"],
+            PROMPT_VERSION,
+        )
+        self.assertIn(
+            "response values in English",
+            prompt.system_instructions,
+        )
+        self.assertIn(
+            "do not infer causes or operational events",
+            prompt.system_instructions,
+        )
+        self.assertEqual(
             payload["required_response_sections"],
             list(RESPONSE_SECTIONS),
         )
