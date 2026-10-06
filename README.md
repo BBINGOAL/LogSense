@@ -4,7 +4,7 @@ LogSense is a learning project for analyzing application logs and detecting anom
 
 ## Current progress
 
-Phase 9 - Docker and Continuous Integration
+Phase 10 - Offline CloudWatch connector
 
 The current program can:
 
@@ -52,6 +52,12 @@ The current program can:
 - Proxy dashboard API requests from Nginx to FastAPI
 - Run backend unit tests automatically with GitHub Actions
 - Run frontend lint and production build automatically with GitHub Actions
+- Represent external log providers through a LogSource boundary
+- Map paginated CloudWatch responses into RawLogEvent records
+- Continue pagination across empty CloudWatch response pages
+- Create a CloudWatch client from environment configuration
+- Report credential, connection, and permission failures clearly
+- Test the CloudWatch connector entirely with fake and mocked clients
 
 ## Current data flow
 
@@ -294,3 +300,6 @@ GitHub Actions runs automated checks for pull requests into `main`:
 - Docker Compose currently runs the API and dashboard only; PostgreSQL
   will be added after a persistent storage layer is implemented
 - Gemini is the only configured LLM provider
+- The CloudWatch connector is validated with offline contract tests only
+- No AWS credentials, resources, or live CloudWatch requests are used
+- The CloudWatch connector is not connected to the dashboard API yet
