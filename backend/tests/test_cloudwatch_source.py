@@ -24,6 +24,23 @@ class FakeCloudWatchLogsClient:
         return self.response
 
 
+class PagedFakeCloudWatchLogsClient:
+    def __init__(
+        self,
+        responses: list[dict[str, Any]],
+    ):
+        self.responses = responses
+        self.requests: list[dict[str, Any]] = []
+
+    def filter_log_events(
+        self,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        response_index = len(self.requests)
+        self.requests.append(kwargs)
+        return self.responses[response_index]
+
+
 class TestCloudWatchLogSource(unittest.TestCase):
     def setUp(self):
         self.start_time = datetime(
@@ -148,6 +165,68 @@ class TestCloudWatchLogSource(unittest.TestCase):
                 client=client,
                 log_group_name=" ",
             )
+
+    def test_fetches_all_pages_including_after_empty_page(self):
+        second_timestamp = self.start_time + timedelta(seconds=10)
+
+        client = PagedFakeCloudWatchLogsClient(
+            [
+                {
+                    "events": [
+                        {
+                            "eventId": "event-1",
+                            "logStreamName": "auth-stream",
+                            "timestamp": int(
+                                self.start_time.timestamp() * 1000
+                            ),
+                            "message": '{"sequence":1}',
+                        }
+                    ],
+                    "nextToken": "page-2",
+                },
+                {
+                    "events": [],
+                    "nextToken": "page-3",
+                },
+                {
+                    "events": [
+                        {
+                            "eventId": "event-2",
+                            "logStreamName": "auth-stream",
+                            "timestamp": int(
+                                second_timestamp.timestamp() * 1000
+                            ),
+                            "message": '{"sequence":2}',
+                        }
+                    ]
+                },
+            ]
+        )
+        source = CloudWatchLogSource(
+            client=client,
+            log_group_name="/aws/lambda/auth",
+        )
+
+        events = collect_log_events(
+            source,
+            self.start_time,
+            self.end_time,
+        )
+
+        self.assertEqual(
+            [event.source_id for event in events],
+            ["event-1", "event-2"],
+        )
+        self.assertEqual(len(client.requests), 3)
+        self.assertNotIn("nextToken", client.requests[0])
+        self.assertEqual(
+            client.requests[1]["nextToken"],
+            "page-2",
+        )
+        self.assertEqual(
+            client.requests[2]["nextToken"],
+            "page-3",
+        )
 
 
 if __name__ == "__main__":

@@ -40,36 +40,46 @@ class CloudWatchLogSource:
         start_time: datetime,
         end_time: datetime,
     ) -> list[RawLogEvent]:
-        response = self.client.filter_log_events(
-            logGroupName=self.log_group_name,
-            startTime=_to_epoch_milliseconds(start_time),
-            endTime=_to_epoch_milliseconds(end_time),
-            startFromHead=True,
-        )
+        request: dict[str, Any] = {
+            "logGroupName": self.log_group_name,
+            "startTime": _to_epoch_milliseconds(start_time),
+            "endTime": _to_epoch_milliseconds(end_time),
+            "startFromHead": True,
+        }
 
         raw_events = []
 
-        for event in response.get("events", []):
-            ingestion_time_ms = event.get("ingestionTime")
+        while True:
+            response = self.client.filter_log_events(**request)
 
-            raw_events.append(
-                RawLogEvent(
-                    source="cloudwatch",
-                    source_group=self.log_group_name,
-                    source_stream=event["logStreamName"],
-                    source_id=event["eventId"],
-                    timestamp=_from_epoch_milliseconds(
-                        event["timestamp"]
-                    ),
-                    ingestion_time=(
-                        None
-                        if ingestion_time_ms is None
-                        else _from_epoch_milliseconds(
-                            ingestion_time_ms
-                        )
-                    ),
-                    message=event["message"],
+            for event in response.get("events", []):
+                ingestion_time_ms = event.get("ingestionTime")
+
+                raw_events.append(
+                    RawLogEvent(
+                        source="cloudwatch",
+                        source_group=self.log_group_name,
+                        source_stream=event["logStreamName"],
+                        source_id=event["eventId"],
+                        timestamp=_from_epoch_milliseconds(
+                            event["timestamp"]
+                        ),
+                        ingestion_time=(
+                            None
+                            if ingestion_time_ms is None
+                            else _from_epoch_milliseconds(
+                                ingestion_time_ms
+                            )
+                        ),
+                        message=event["message"],
+                    )
                 )
-            )
+
+            next_token = response.get("nextToken")
+
+            if next_token is None:
+                break
+
+            request["nextToken"] = next_token
 
         return raw_events
