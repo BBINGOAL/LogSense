@@ -2,8 +2,15 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+from botocore.exceptions import (
+    ClientError,
+    EndpointConnectionError,
+    NoCredentialsError,
+)
+
 from backend.app.ingestion.cloudwatch import (
     CloudWatchLogSource,
+    CloudWatchLogSourceError,
 )
 from backend.app.ingestion.source import (
     RawLogEvent,
@@ -39,6 +46,17 @@ class PagedFakeCloudWatchLogsClient:
         response_index = len(self.requests)
         self.requests.append(kwargs)
         return self.responses[response_index]
+
+
+class FailingCloudWatchLogsClient:
+    def __init__(self, error: Exception):
+        self.error = error
+
+    def filter_log_events(
+        self,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        raise self.error
 
 
 class TestCloudWatchLogSource(unittest.TestCase):
@@ -227,6 +245,75 @@ class TestCloudWatchLogSource(unittest.TestCase):
             client.requests[2]["nextToken"],
             "page-3",
         )
+
+    def test_reports_missing_credentials(self):
+        original_error = NoCredentialsError()
+        client = FailingCloudWatchLogsClient(original_error)
+        source = CloudWatchLogSource(
+            client=client,
+            log_group_name="/aws/lambda/auth",
+        )
+
+        with self.assertRaisesRegex(
+            CloudWatchLogSourceError,
+            "credentials are not configured",
+        ) as context:
+            collect_log_events(
+                source,
+                self.start_time,
+                self.end_time,
+            )
+
+        self.assertIs(
+            context.exception.__cause__,
+            original_error,
+        )
+
+    def test_reports_connection_failure(self):
+        original_error = EndpointConnectionError(
+            endpoint_url="https://logs.example"
+        )
+        client = FailingCloudWatchLogsClient(original_error)
+        source = CloudWatchLogSource(
+            client=client,
+            log_group_name="/aws/lambda/auth",
+        )
+
+        with self.assertRaisesRegex(
+            CloudWatchLogSourceError,
+            "Could not connect to CloudWatch Logs",
+        ):
+            collect_log_events(
+                source,
+                self.start_time,
+                self.end_time,
+            )
+
+    def test_reports_aws_permission_error_code(self):
+        original_error = ClientError(
+            {
+                "Error": {
+                    "Code": "AccessDeniedException",
+                    "Message": "Access denied",
+                }
+            },
+            "FilterLogEvents",
+        )
+        client = FailingCloudWatchLogsClient(original_error)
+        source = CloudWatchLogSource(
+            client=client,
+            log_group_name="/aws/lambda/auth",
+        )
+
+        with self.assertRaisesRegex(
+            CloudWatchLogSourceError,
+            "AccessDeniedException",
+        ):
+            collect_log_events(
+                source,
+                self.start_time,
+                self.end_time,
+            )
 
 
 if __name__ == "__main__":

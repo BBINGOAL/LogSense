@@ -1,7 +1,16 @@
 from datetime import datetime, timezone
 from typing import Any, Protocol
+from botocore.exceptions import (
+    ClientError,
+    EndpointConnectionError,
+    NoCredentialsError,
+)
 
 from backend.app.ingestion.source import RawLogEvent
+
+
+class CloudWatchLogSourceError(RuntimeError):
+    """CloudWatch could not provide log events."""
 
 
 class CloudWatchLogsClient(Protocol):
@@ -50,7 +59,29 @@ class CloudWatchLogSource:
         raw_events = []
 
         while True:
-            response = self.client.filter_log_events(**request)
+            try:
+                response = self.client.filter_log_events(**request)
+            except NoCredentialsError as error:
+                raise CloudWatchLogSourceError(
+                    "CloudWatch credentials are not configured"
+                ) from error
+            except EndpointConnectionError as error:
+                raise CloudWatchLogSourceError(
+                    "Could not connect to CloudWatch Logs"
+                ) from error
+            except ClientError as error:
+                error_code = error.response.get(
+                    "Error",
+                    {},
+                ).get(
+                    "Code",
+                    "Unknown",
+                )
+
+                raise CloudWatchLogSourceError(
+                    "CloudWatch rejected FilterLogEvents "
+                    f"({error_code})"
+                ) from error
 
             for event in response.get("events", []):
                 ingestion_time_ms = event.get("ingestionTime")
