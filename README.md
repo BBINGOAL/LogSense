@@ -4,7 +4,7 @@ LogSense is a learning project for analyzing application logs and detecting anom
 
 ## Current progress
 
-Phase 8 - React Dashboard
+Phase 9 - Docker and Continuous Integration
 
 The current program can:
 
@@ -45,6 +45,13 @@ The current program can:
 - Switch dashboard interface labels between Thai and English
 - Display loading, error, empty, and successful data states
 - Retry a failed dashboard API request
+- Build the backend API as a Docker image
+- Build the React dashboard as a multi-stage Docker image
+- Serve production frontend files through Nginx
+- Run the backend and frontend together with Docker Compose
+- Proxy dashboard API requests from Nginx to FastAPI
+- Run backend unit tests automatically with GitHub Actions
+- Run frontend lint and production build automatically with GitHub Actions
 
 ## Current data flow
 
@@ -82,7 +89,7 @@ LLM analysis is stored as canonical English content. Translation belongs
 to the dashboard presentation layer and is not part of the analysis
 pipeline.
 
-The Phase 8 dashboard currently consumes deterministic in-memory sample
+The dashboard currently consumes deterministic in-memory sample
 incident records through the API. This keeps the HTTP and UI flow
 testable before persistent storage is introduced.
 
@@ -142,6 +149,7 @@ synthetic-data comparison and limitations.
 
 - Python 3.11 or newer
 - Node.js 20.19 or newer
+- Docker Desktop with Docker Compose
 
 ## Setup
 
@@ -187,7 +195,32 @@ The `.env` file is ignored by Git and must never be committed.
 A Gemini key is required only for live LLM requests; automated tests
 do not call the external API.
 
-## Run the dashboard
+## Run with Docker
+
+Build and start the backend and frontend containers:
+
+```powershell
+docker compose up --build -d
+```
+
+Check the running services:
+
+```powershell
+docker compose ps
+```
+
+Open the dashboard at `http://127.0.0.1:8082`.
+
+Dashboard requests to `/api` are proxied by Nginx to the FastAPI
+backend through the private Docker Compose network.
+
+Stop and remove the containers and network:
+
+```powershell
+docker compose down
+```
+
+## Run locally without Docker
 
 Start the backend API from the repository root:
 
@@ -229,6 +262,15 @@ npm run lint
 npm run build
 ```
 
+## Continuous integration
+
+GitHub Actions runs automated checks for pull requests into `main`:
+
+- Backend CI installs Python 3.13 dependencies and runs all unit tests
+- Frontend CI installs Node.js 24 dependencies, runs ESLint, and
+  creates a production build
+- Automated tests use a fake Gemini boundary and do not require an API key
+
 ## Current limitations
 
 - Field value types are not fully validated yet
@@ -249,4 +291,6 @@ npm run build
 - Thai/English switching translates interface labels, while canonical
   LLM analysis remains in English
 - Frontend component tests are not configured yet
+- Docker Compose currently runs the API and dashboard only; PostgreSQL
+  will be added after a persistent storage layer is implemented
 - Gemini is the only configured LLM provider
