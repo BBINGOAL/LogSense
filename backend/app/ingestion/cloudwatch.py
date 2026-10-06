@@ -1,0 +1,75 @@
+from datetime import datetime, timezone
+from typing import Any, Protocol
+
+from backend.app.ingestion.source import RawLogEvent
+
+
+class CloudWatchLogsClient(Protocol):
+    def filter_log_events(
+        self,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        ...
+
+
+def _to_epoch_milliseconds(timestamp: datetime) -> int:
+    return int(timestamp.timestamp() * 1000)
+
+
+def _from_epoch_milliseconds(value: int) -> datetime:
+    return datetime.fromtimestamp(
+        value / 1000,
+        tz=timezone.utc,
+    )
+
+
+class CloudWatchLogSource:
+    def __init__(
+        self,
+        client: CloudWatchLogsClient,
+        log_group_name: str,
+    ):
+        if not log_group_name.strip():
+            raise ValueError("log_group_name must not be empty")
+
+        self.client = client
+        self.log_group_name = log_group_name
+
+    def fetch_events(
+        self,
+        start_time: datetime,
+        end_time: datetime,
+    ) -> list[RawLogEvent]:
+        response = self.client.filter_log_events(
+            logGroupName=self.log_group_name,
+            startTime=_to_epoch_milliseconds(start_time),
+            endTime=_to_epoch_milliseconds(end_time),
+            startFromHead=True,
+        )
+
+        raw_events = []
+
+        for event in response.get("events", []):
+            ingestion_time_ms = event.get("ingestionTime")
+
+            raw_events.append(
+                RawLogEvent(
+                    source="cloudwatch",
+                    source_group=self.log_group_name,
+                    source_stream=event["logStreamName"],
+                    source_id=event["eventId"],
+                    timestamp=_from_epoch_milliseconds(
+                        event["timestamp"]
+                    ),
+                    ingestion_time=(
+                        None
+                        if ingestion_time_ms is None
+                        else _from_epoch_milliseconds(
+                            ingestion_time_ms
+                        )
+                    ),
+                    message=event["message"],
+                )
+            )
+
+        return raw_events
